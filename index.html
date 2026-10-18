@@ -406,7 +406,215 @@ ins.diff { text-decoration: none; background: var(--surface-3); border-bottom: 2
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 
 
-/* 분석 작성 화면 방식 A, B, C, D */
+/* ── 분석 작성 방식 A, B, C, D (write-modes.js) ───────── */
+/* 방식 고르기 */
+.wm-switch { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.wm-switch-row { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; min-width: 0; }
+.wm-switch-label { font-size: 12.5px; font-weight: 600; color: var(--fg-2); white-space: nowrap; }
+.wm-seg button { display: inline-flex; align-items: center; gap: 6px; }
+.wm-seg .wm-letter { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 6px; background: var(--surface-3); color: var(--fg-2); font-family: var(--mono); font-size: 11px; font-weight: 600; flex: none; }
+.wm-seg button[aria-pressed="true"] .wm-letter { background: var(--role); color: var(--role-fg); }
+.wm-seg button[aria-disabled="true"] { color: var(--fg-3); cursor: not-allowed; }
+.wm-seg button[aria-disabled="true"] .wm-full, .wm-seg button[aria-disabled="true"] .wm-short { text-decoration: line-through; text-decoration-color: var(--line-strong); }
+.wm-seg .wm-short { display: none; }
+.wm-lock { color: var(--fg-3); }
+.wm-switch-desc { min-width: 0; flex: 1 1 200px; }
+.wm-why { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 9px; background: var(--surface-3); color: var(--fg-2); align-self: flex-start; max-width: 100%; }
+@media (max-width: 767px) {
+  .wm-switch-row { gap: 6px; }
+  .wm-seg { width: 100%; }
+  .wm-seg button { flex: 1 1 0; justify-content: center; gap: 3px; padding: 0 4px; min-width: 0; }
+  .wm-seg .wm-letter, .wm-seg .wm-full { display: none; }
+  .wm-seg .wm-short { display: inline; }
+  .wm-switch-desc { flex-basis: 100%; }
+}
+
+/* 영상 카드, 영상+자막 틀 (A, C) */
+.wm-player-card { padding: 12px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.wm-player-card .player-controls { flex-wrap: nowrap; gap: 4px; }
+.wm-player-box { width: 100%; }
+.wm-studio { container: wmstudio / inline-size; }
+.wm-studio-grid { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 20px; align-items: start; }
+.wm-left { position: sticky; top: 88px; display: flex; flex-direction: column; gap: 12px; max-height: calc(100vh - 108px); min-width: 0; }
+.wm-studio-player { flex: none; }
+.wm-studio-player .wm-player-box { width: clamp(170px, calc((100vh - 460px) * 0.5625), 100%); margin: 0 auto; }
+.wm-tr-card { flex: 1 1 auto; min-height: 150px; display: flex; flex-direction: column; overflow: hidden; }
+.wm-tr-head { display: flex; align-items: center; gap: 8px; padding: 12px 14px 6px; }
+.wm-tr-scroll { position: relative; flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 0 6px 10px; }
+.wm-right { min-width: 0; }
+@container wmstudio (max-width: 699px) {
+  .wm-studio-grid { grid-template-columns: minmax(0, 1fr); }
+  .wm-left { position: static; max-height: none; }
+  .wm-studio-player .wm-player-box { width: min(100%, 260px); }
+  .wm-tr-card { min-height: 0; }
+  .wm-tr-scroll { max-height: 200px; }
+}
+@container wmstudio (max-width: 520px) {
+  .wm-studio-player .wm-player-box { width: min(100%, 196px); }
+  .wm-tr-scroll { max-height: 164px; }
+  .wm-item-head { padding: 12px 14px; gap: 10px; }
+  .wm-item-body { padding: 2px 14px 14px; }
+}
+
+/* A 워크벤치: 항목 카드 */
+.wm-wb-head { gap: 8px; }
+.wm-item { scroll-margin-top: 92px; transition: border-color .15s, box-shadow .15s; }
+.wm-item.open { border-color: var(--line-strong); }
+.wm-item.bad { border-color: color-mix(in oklch, var(--bad) 60%, var(--line)); box-shadow: 0 0 0 3px var(--bad-soft); }
+.wm-item-head { display: flex; align-items: center; gap: 12px; width: 100%; min-width: 0; padding: 14px 16px; border: 0; background: transparent; color: var(--fg); text-align: left; border-radius: var(--r-card); }
+.wm-item-head:hover { background: var(--surface-2); }
+.wm-item.open > .wm-item-head { border-radius: var(--r-card) var(--r-card) 0 0; }
+.wm-item-body { padding: 2px 16px 16px 54px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.wm-st { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--fg-3); white-space: nowrap; }
+.wm-st.ok { color: var(--ok); }
+.wm-st.warn { color: var(--warn); }
+.wm-st.bad { color: var(--bad); font-weight: 600; }
+.wm-bad { color: var(--bad); }
+.wm-guide { display: flex; align-items: flex-start; gap: 8px; padding: 9px 11px; border-radius: 10px; background: var(--surface-2); color: var(--fg-2); font-size: 12.5px; line-height: 1.55; }
+.wm-guide .icon { margin-top: 1px; color: var(--fg-3); }
+.wm-kp-input { width: 200px; height: 30px; font-size: 13px; }
+.wm-bottom { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; padding: 12px 16px; border: 1px solid var(--line); border-radius: var(--r-card); background: var(--surface); }
+.wm-progress { display: inline-flex; align-items: center; gap: 8px; }
+.wm-progress .progress { width: 90px; }
+
+/* D 한 항목씩 */
+.wm-focus-wrap { container: wmfocus / inline-size; }
+.wm-focus { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 20px; align-items: start; }
+.wm-focus-left { position: sticky; top: 88px; max-height: calc(100vh - 100px); overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding: 3px; margin: -3px; scrollbar-width: thin; }
+.wm-fold > summary, .wm-guide-fold > summary, .wm-tl-sums > summary { list-style: none; display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13.5px; font-weight: 500; }
+.wm-fold > summary::-webkit-details-marker, .wm-guide-fold > summary::-webkit-details-marker, .wm-tl-sums > summary::-webkit-details-marker { display: none; }
+.wm-fold > summary { padding: 12px 14px; border-radius: var(--r-card); }
+.wm-fold > summary:hover { background: var(--surface-2); }
+.wm-fold-chev { transition: transform .15s ease; color: var(--fg-3); }
+details[open] > summary .wm-fold-chev { transform: rotate(180deg); }
+.wm-fold-body { padding: 0 8px 10px; max-height: 260px; overflow-y: auto; }
+.wm-prev { display: flex; flex-direction: column; gap: 8px; padding: 14px 16px; }
+.wm-prev-item { display: flex; flex-direction: column; gap: 1px; border: 0; background: none; padding: 4px 6px; margin: 0 -6px; border-radius: 8px; text-align: left; color: var(--fg); }
+.wm-prev-item:hover { background: var(--surface-2); }
+.wm-clamp2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: keep-all; overflow-wrap: anywhere; }
+.wm-stepper-card { padding: 14px 18px 16px; }
+.wm-stepper-card .stepper button { cursor: pointer; padding: 4px 0; }
+.wm-stepper-card .stepper button:hover .bar { filter: brightness(0.96); }
+.wm-stepper-card .stepper button:not(.done):not(.current):hover .bar { background: var(--line-strong); }
+.wm-item-card { padding: 26px 30px 22px; display: flex; flex-direction: column; gap: 18px; }
+.wm-item-top { display: flex; align-items: center; gap: 6px 10px; flex-wrap: wrap; }
+.wm-item-kicker { color: var(--role-strong); font-weight: 600; font-size: 14px; }
+.wm-item-q { font-size: 24px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.32; }
+.wm-item-help { color: var(--fg-2); font-size: 14.5px; line-height: 1.6; }
+.wm-guide-fold { border: 1px solid var(--line); border-radius: 14px; background: var(--surface-2); }
+.wm-guide-fold > summary { padding: 10px 14px; color: var(--fg-2); }
+.wm-guide-fold > p { padding: 0 14px 12px 37px; font-size: 13.5px; line-height: 1.6; color: var(--fg); }
+.wm-item-nav { display: flex; align-items: center; gap: 10px; padding-top: 16px; border-top: 1px solid var(--line); }
+.wm-item-nav .btn { height: 44px; }
+.wm-kbd { display: flex; justify-content: flex-end; gap: 4px; align-items: center; font-size: 12px; color: var(--fg-3); margin-top: -8px; }
+.wm-kbd span { margin-left: 4px; }
+.wm-end-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.wm-end-row { display: flex; align-items: center; gap: 12px; width: 100%; min-width: 0; padding: 8px 10px; border: 0; border-radius: 10px; background: transparent; color: var(--fg); text-align: left; }
+.wm-end-row:hover { background: var(--surface-2); }
+@container wmfocus (max-width: 760px) {
+  .wm-focus { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+  .wm-focus-left { position: static; max-height: none; overflow: visible; margin: 0; padding: 0; }
+  .wm-focus-left .wm-player-box { width: min(250px, 72%); margin: 0 auto; }
+  .wm-prev { display: none; }
+  .wm-item-card { padding: 18px 16px 16px; gap: 14px; }
+  .wm-item-q { font-size: 19px; }
+  .wm-item-help { font-size: 13.5px; }
+  .wm-next-name { display: none; }
+}
+
+/* B 타임라인 태깅 */
+.wm-tl { container: wmtl / inline-size; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.wm-tl-layout { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-areas: "player panel" "tl tl" "memo memo"; gap: 16px; align-items: start; }
+.wm-tl-player { grid-area: player; min-width: 0; }
+.wm-tl-player .wm-player-box { width: clamp(170px, calc((100vh - 520px) * 0.5625), 240px); margin: 0 auto; }
+.wm-tl-player .wm-player-card { width: max-content; max-width: 100%; }
+/* 고른 마커 패널은 영상 높이에 맞추고 넘치면 안에서 스크롤해요 (마커를 골라도 타임라인이 밀리지 않게) */
+.wm-tl-panel { grid-area: panel; align-self: stretch; contain: size; overflow-y: auto; padding: 16px 18px; display: flex; flex-direction: column; gap: 12px; min-width: 0; scroll-margin-top: 92px; scrollbar-width: thin; transition: border-color .15s, box-shadow .15s; }
+.wm-tl-panel > * { flex: none; }
+.wm-tl-memo { grid-area: memo; padding: 16px 18px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.wm-tl-card { grid-area: tl; padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.wm-tl-panel-head { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 10px; min-width: 0; }
+.wm-tl-h3 { font-size: 15.5px; font-weight: 600; }
+.wm-tl-time { font-weight: 500; color: var(--role-strong); font-size: 14px; }
+.wm-tl-empty { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; padding: 18px 8px 10px; color: var(--fg-2); }
+.wm-tl-empty .icon-lg { color: var(--fg-3); }
+.wm-tl-note-row { gap: 8px; }
+.wm-sgm-name { width: 110px; height: 34px; font-size: 13px; padding: 0 10px; }
+.wm-tl-memo-head { gap: 8px; }
+.wm-tl-memo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr)); gap: 12px; }
+.wm-tl-memo .textarea { min-height: 58px; font-size: 13.5px; padding: 8px 10px; }
+.wm-memo-more { height: 26px; padding: 0 6px; font-size: 12px; color: var(--fg-3); gap: 2px; }
+.wm-memo-more.on { color: var(--role-strong); background: var(--role-muted); }
+.wm-tl-sums { border-top: 1px solid var(--line); padding-top: 10px; }
+.wm-tl-sums > summary { padding: 4px 2px; color: var(--fg-2); }
+.wm-tl-sums[open] > summary { margin-bottom: 10px; }
+
+.wm-tl-bar { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.wm-tl-play { width: 36px; height: 36px; display: grid; place-items: center; border: 0; border-radius: 999px; background: var(--ink); color: var(--on-ink); flex: none; }
+.wm-tl-count { background: var(--surface-3); color: var(--fg); height: 26px; padding: 0 10px; font-size: 12.5px; }
+.wm-tl-adds { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; min-width: 0; }
+.wm-tl-adds-label { margin-right: 2px; }
+.wm-tl-add { height: 30px; padding: 0 9px 0 6px; gap: 5px; }
+.wm-tl-add kbd { line-height: 16px; }
+.wm-tl-flash { color: var(--role-strong); font-weight: 500; min-width: 0; }
+.wm-tl-hint { display: flex; align-items: center; gap: 6px; color: var(--fg-2); background: var(--surface-2); border-radius: 9px; padding: 7px 10px; }
+.wm-tl-scroll { overflow-x: auto; overflow-y: hidden; max-width: 100%; border: 1px solid var(--line); border-radius: 12px; overscroll-behavior-x: contain; scrollbar-width: thin; }
+.wm-tl-grid { position: relative; padding-right: 28px; }
+.wm-tl-row { display: flex; height: 46px; border-top: 1px solid var(--line); }
+.wm-tl-row.wm-tl-ruler-row { height: 30px; border-top: 0; }
+.wm-tl-row.on .wm-tl-lane { background: color-mix(in oklch, var(--role-muted) 45%, transparent); }
+.wm-tl-lab { position: sticky; left: 0; z-index: 4; flex: none; display: flex; flex-direction: column; justify-content: center; gap: 0; padding: 0 10px 0 12px; border: 0; border-right: 1px solid var(--line); background: var(--surface); color: var(--fg); text-align: left; min-width: 0; }
+button.wm-tl-lab:hover { background: var(--surface-2); }
+.wm-tl-lab.on { background: var(--role-muted); }
+.wm-tl-lab.on .wm-tl-lab-name { color: var(--role-strong); }
+.wm-tl-lab.bad .wm-tl-lab-name { color: var(--bad); }
+.wm-tl-lab-name { font-size: 13px; font-weight: 600; max-width: 100%; }
+.wm-tl-lab-sub { font-size: 11.5px; color: var(--fg-3); max-width: 100%; }
+.wm-tl-lane { position: relative; flex: none; cursor: pointer; }
+.wm-tl-ruler { position: relative; flex: none; cursor: ew-resize; font-family: var(--mono); font-size: 11px; color: var(--fg-3); touch-action: none; user-select: none; }
+.wm-tick { position: absolute; top: 7px; transform: translateX(-50%); white-space: nowrap; }
+.wm-tick::before { content: ""; position: absolute; left: 50%; top: 17px; height: 6px; width: 1px; background: var(--line-strong); }
+.wm-tick.first { transform: none; }
+.wm-tick.first::before { left: 0; }
+.wm-tick.last { transform: translateX(-100%); }
+.wm-tick.last::before { left: auto; right: 0; }
+.wm-tl-now { position: absolute; top: 4px; transform: translateX(-50%); padding: 1px 6px; border-radius: 5px; background: var(--role); color: var(--role-fg); font-weight: 600; z-index: 3; pointer-events: none; }
+.wm-tl-head { position: absolute; top: 22px; bottom: 0; width: 2px; margin-left: -1px; background: var(--role); z-index: 2; pointer-events: none; }
+
+.wm-cap { position: absolute; top: 9px; height: 28px; padding: 0 6px; border: 0; border-radius: 6px; background: var(--surface-3); color: var(--fg-2); font-size: 11.5px; line-height: 28px; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wm-cap:hover { color: var(--fg); }
+.wm-cap.on { background: var(--role-muted); color: var(--role-strong); font-weight: 600; }
+.wm-cut { position: absolute; top: 13px; height: 20px; width: 2px; margin-left: -1px; border-radius: 2px; background: var(--fg-3); opacity: .55; }
+.wm-mk { position: absolute; top: 11px; height: 24px; display: inline-flex; align-items: center; gap: 5px; padding: 0 8px 0 7px; transform: translateX(-12px); border: 1px solid var(--line-strong); border-radius: 999px; background: var(--surface); color: var(--fg); font-size: 11.5px; white-space: nowrap; z-index: 1; touch-action: none; user-select: none; cursor: grab; }
+.wm-mk:hover { border-color: var(--role-border); z-index: 2; }
+.wm-mk.flip { flex-direction: row-reverse; padding: 0 7px 0 8px; transform: translateX(calc(-100% + 12px)); }
+.wm-mk-dot { width: 8px; height: 8px; border-radius: 999px; background: var(--fg-2); flex: none; }
+.wm-mk-lab { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.wm-mk.on { background: var(--role); border-color: transparent; color: var(--role-fg); font-weight: 600; box-shadow: 0 0 0 3px var(--role-muted); z-index: 3; }
+.wm-mk.on .wm-mk-dot { background: var(--role-fg); }
+.wm-mk.drag { cursor: grabbing; z-index: 3; }
+.wm-sgm { position: absolute; top: 9px; height: 28px; display: flex; align-items: center; justify-content: center; padding: 0 6px; border: 0; border-radius: 6px; font-size: 12px; font-weight: 600; min-width: 0; overflow: hidden; }
+.wm-sgm.tone0 { background: var(--ink); color: var(--on-ink); }
+.wm-sgm.tone1 { background: var(--line-strong); color: var(--fg); }
+.wm-sgm.tone2 { background: var(--surface-3); color: var(--fg); }
+.wm-sgm-sub { font-weight: 400; opacity: .85; }
+.wm-sgm.bad { box-shadow: inset 0 0 0 2px var(--bad); }
+.wm-sgm.on { box-shadow: 0 0 0 2px var(--role), 0 0 0 5px var(--role-muted); z-index: 1; }
+.wm-sgm-handle { position: absolute; top: 5px; height: 36px; width: 12px; margin-left: -7px; border-radius: 4px; cursor: ew-resize; z-index: 2; touch-action: none; }
+.wm-sgm-handle::after { content: ""; position: absolute; left: 5px; top: 6px; bottom: 6px; width: 3px; border-radius: 3px; background: var(--role); opacity: 0; transition: opacity .15s; }
+.wm-sgm-handle:hover::after, .wm-sgm-handle.on::after, .wm-sgm-handle:focus-visible::after { opacity: 1; }
+
+@container wmtl (max-width: 759px) {
+  .wm-tl-layout { grid-template-columns: minmax(0, 1fr); grid-template-areas: "player" "tl" "panel" "memo"; gap: 14px; }
+  .wm-tl-panel { contain: none; overflow: visible; align-self: start; }
+  .wm-tl-player .wm-player-card { width: auto; }
+  .wm-tl-player .wm-player-box { width: min(220px, 64%); }
+  .wm-tl-panel, .wm-tl-memo { padding: 14px; }
+  .wm-tl-card { padding: 12px; }
+  .wm-tl-add kbd { display: none; }
+  .wm-tl-add { padding: 0 9px; }
+  .wm-tl-lab { padding: 0 6px 0 8px; }
+}
 
 /* ── 학생 화면 (pages-student.js) ───────────── */
 .st-tone-ok { color: var(--ok); }
@@ -503,7 +711,7 @@ button.st-row-title:hover { color: var(--role-strong); text-decoration: underlin
 .st-sum dt { color: var(--fg-2); }
 .st-sum dd { margin: 0; text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
 
-/* 분석 작성 (시안 D) */
+/* 분석 작성: 방식 전환 줄과 좁은 화면 배지 (본문은 write-modes.css) */
 .st-write-wrap { container-type: inline-size; }
 .st-topbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin-bottom: 14px; min-width: 0; }
 .st-topbar-meta { min-width: 0; max-width: 40%; }
@@ -511,46 +719,8 @@ button.st-row-title:hover { color: var(--role-strong); text-decoration: underlin
 .st-saved { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
 .st-note { margin-bottom: 14px; }
 .st-attempt-narrow { display: none; margin-left: 8px; vertical-align: 1px; }
-.st-write { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 20px; align-items: start; }
-.st-write-left { position: sticky; top: 88px; max-height: calc(100vh - 100px); overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding: 3px; margin: -3px; scrollbar-width: thin; }
-.st-player-card { padding: 12px; display: flex; flex-direction: column; gap: 10px; }
-.st-player-box { width: 100%; }
-.st-player-card .player-controls { flex-wrap: nowrap; gap: 4px; }
-.st-fold > summary, .st-guide > summary { list-style: none; display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13.5px; font-weight: 500; }
-.st-fold > summary::-webkit-details-marker, .st-guide > summary::-webkit-details-marker { display: none; }
-.st-fold > summary { padding: 12px 14px; border-radius: var(--r-card); }
-.st-fold > summary:hover { background: var(--surface-2); }
-.st-fold-chev { transition: transform .15s ease; color: var(--fg-3); }
-details[open] > summary .st-fold-chev { transform: rotate(180deg); }
-.st-fold-body { padding: 0 8px 10px; max-height: 260px; overflow-y: auto; }
-.st-prev { display: flex; flex-direction: column; gap: 8px; padding: 14px 16px; }
-.st-prev-item { display: flex; flex-direction: column; gap: 1px; border: 0; background: none; padding: 4px 6px; margin: 0 -6px; border-radius: 8px; text-align: left; color: var(--fg); }
-.st-prev-item:hover { background: var(--surface-2); }
-.st-stepper-card { padding: 14px 18px 16px; }
-.st-stepper-card .stepper button { cursor: pointer; padding: 4px 0; }
-.st-stepper-card .stepper button:hover .bar { filter: brightness(0.96); }
-.st-stepper-card .stepper button:not(.done):not(.current):hover .bar { background: var(--line-strong); }
-.st-item-card { padding: 26px 30px 22px; display: flex; flex-direction: column; gap: 18px; }
-.st-item-top { display: flex; align-items: center; gap: 6px 10px; flex-wrap: wrap; }
-.st-item-kicker { color: var(--role-strong); font-weight: 600; font-size: 14px; }
-.st-item-q { font-size: 24px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.32; }
-.st-item-help { color: var(--fg-2); font-size: 14.5px; line-height: 1.6; }
-.st-guide { border: 1px solid var(--line); border-radius: 14px; background: var(--surface-2); }
-.st-guide > summary { padding: 10px 14px; color: var(--fg-2); }
-.st-guide > p { padding: 0 14px 12px 37px; font-size: 13.5px; line-height: 1.6; color: var(--fg); }
-.st-item-nav { display: flex; align-items: center; gap: 10px; padding-top: 16px; border-top: 1px solid var(--line); }
-.st-item-nav .btn { height: 44px; }
-.st-kbd { display: flex; justify-content: flex-end; gap: 4px; align-items: center; font-size: 12px; color: var(--fg-3); margin-top: -8px; }
-.st-kbd span { margin-left: 4px; }
+.st-modebar { margin-bottom: 16px; min-width: 0; }
 @container (max-width: 760px) {
-  .st-write { grid-template-columns: minmax(0, 1fr); gap: 14px; }
-  .st-write-left { position: static; max-height: none; overflow: visible; margin: 0; padding: 0; }
-  .st-player-box { width: min(250px, 72%); margin: 0 auto; }
-  .st-prev { display: none; }
-  .st-item-card { padding: 18px 16px 16px; gap: 14px; }
-  .st-item-q { font-size: 19px; }
-  .st-item-help { font-size: 13.5px; }
-  .st-next-name { display: none; }
   .st-topbar-meta { display: none; }
   .st-attempt-narrow { display: inline-flex; }
 }
@@ -680,6 +850,8 @@ details[open] > summary .st-fold-chev { transform: rotate(180deg); }
 .te-skip li { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 10px; font-size: 12.5px; min-width: 0; }
 .te-skip-url { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
 .te-title-cell { display: flex; align-items: center; gap: 12px; min-width: 200px; max-width: 340px; }
+.te-title-cell > .stack-sm { overflow: hidden; }
+.te-title-cell .ellipsis { display: block; }
 .te-status-cell { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; min-width: 140px; }
 .te-sk { display: inline-block; width: 36px; height: 10px; vertical-align: middle; }
 .te-dcards { display: flex; flex-direction: column; gap: 10px; }
@@ -705,19 +877,10 @@ details[open] > summary .st-fold-chev { transform: rotate(180deg); }
 .te-save { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
 .te-top-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .te-live { height: 28px; padding: 0 10px; }
-.te-modebar { gap: 12px; }
+.te-modebar { min-width: 0; }
 .te-pubrow { align-items: stretch; }
 .te-subs { display: flex; align-items: center; gap: 12px; padding: 12px 16px; }
 
-.te-studio { container: testudio / inline-size; }
-.te-studio-grid { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 20px; align-items: start; }
-.te-left { position: sticky; top: 88px; display: flex; flex-direction: column; gap: 12px; max-height: calc(100vh - 108px); min-width: 0; }
-.te-player-card { padding: 12px; display: flex; flex-direction: column; gap: 10px; flex: none; }
-.te-player-box { width: clamp(170px, calc((100vh - 460px) * 0.5625), 100%); margin: 0 auto; }
-.te-tr-card { flex: 1 1 auto; min-height: 150px; display: flex; flex-direction: column; overflow: hidden; }
-.te-tr-head { display: flex; align-items: center; gap: 8px; padding: 12px 14px 6px; }
-.te-tr-scroll { position: relative; flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 0 6px 10px; }
-.te-right { min-width: 0; }
 .te-items-head { gap: 8px; }
 
 .te-item { scroll-margin-top: 92px; transition: border-color .15s, box-shadow .15s; }
@@ -754,19 +917,13 @@ details[open] > summary .st-fold-chev { transform: rotate(180deg); }
 .te-step.now { color: var(--fg); font-weight: 600; }
 .te-step.now .te-step-dot { background: var(--role); color: var(--role-fg); border-color: transparent; }
 
-@container testudio (max-width: 699px) {
-  .te-studio-grid { grid-template-columns: minmax(0, 1fr); }
-  .te-left { position: static; max-height: none; }
-  .te-player-box { width: min(100%, 260px); }
-  .te-tr-card { min-height: 0; }
-  .te-tr-scroll { max-height: 200px; }
-}
-@container testudio (max-width: 520px) {
-  .te-player-box { width: min(100%, 196px); }
-  .te-tr-scroll { max-height: 164px; }
+/* 검수 카드(C)는 공통 영상+자막 틀(wm-studio) 안에 들어가요 */
+@container wmstudio (max-width: 520px) {
   .te-item-head { padding: 12px 14px; gap: 10px; }
   .te-item-body { padding: 2px 14px 14px; }
 }
+.te-ai-empty-foot { display: flex; flex-direction: column; gap: 10px; padding: 0 20px 18px; text-align: center; align-items: center; }
+.te-ai-empty-foot .callout { text-align: left; width: 100%; }
 
 /* 학생 결과 */
 .te-stable th.te-num, .te-stable td.te-num { text-align: right; }
@@ -3042,18 +3199,671 @@ PAGES.credits = CreditsPage;
 
 
 // ===== write-modes.js =====
-// 분석 작성 화면 방식 A, B, C, D 공통 컴포넌트 (접두어 Wm)
+// ── 분석 작성 방식 A, B, C, D (접두어 Wm) ─────────────────
+// 선생님 정답지 작성(editor)과 학생 분석 작성(write)이 함께 씁니다. 모든 방식이 같은 내용을 고칩니다.
+// 내용: 루브릭 key → { text, hookType?, segments?, evidence?: [{ t, end?, label }], keyPoints? (선생님만) }
+// A 워크벤치: 영상, 자막, 10개 항목을 나란히 · B 타임라인: 마커를 찍으며 · C AI 초안 검수(선생님만) · D 한 항목씩
+
+const WM_MODES = [
+  { key: 'A', name: '워크벤치', short: '워크벤치', desc: '영상과 자막을 보며 10개 항목을 한 화면에서 써요.' },
+  { key: 'B', name: '타임라인', short: '타임라인', desc: '영상을 보며 타임라인에 마커를 찍어 근거 시점을 남겨요.' },
+  { key: 'C', name: 'AI 초안 검수', short: 'AI 검수', desc: 'AI가 쓴 초안을 항목마다 수락하거나 고쳐요.' },
+  { key: 'D', name: '한 항목씩', short: '한 항목씩', desc: '질문 하나씩 차례대로 써요.' },
+];
+const WM_STORE = 'noonchy-proto:write-mode:';
+function wmLoadMode(role) { try { const v = localStorage.getItem(WM_STORE + role); return WM_MODES.some((m) => m.key === v) ? v : null; } catch { return null; } }
+function wmSaveMode(role, v) { try { localStorage.setItem(WM_STORE + role, v); } catch {} }
+const WM_CIRCLED = '①②③④⑤⑥⑦⑧⑨⑩';
+const WM_MAC = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent || '');
+const wmItem = (key) => RUBRIC.find((i) => i.key === key);
+const wmAreaName = (key) => (AREAS.find((a) => a.key === key) || {}).name || '';
+function wmTyping(el) { return !!el && (el.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName || '')); }
+// 항목에 무엇이라도 썼는지 (훅 유형, 글, 구간 설명, 근거 설명)
+function wmHasAny(item, v) {
+  if (!v) return false;
+  const txt = [v.text, ...(v.segments || []).map((s) => s.text), ...(v.evidence || []).map((e) => e.label)].join('').trim();
+  return !!txt || !!v.hookType;
+}
+function wmAnswerLine(item, v) {
+  v = v || {};
+  if (item.kind === 'segments' && (v.segments || []).length) return v.segments.map((s) => s.name).join(' → ') + (v.text ? ' · ' + v.text : '');
+  return [item.kind === 'hook' ? v.hookType : '', v.text].filter(Boolean).join(' · ');
+}
+function useWmWidth(ref) {
+  const [w, setW] = useState(0);
+  useEffect(() => {
+    const el = ref.current; if (!el) return;
+    setW(Math.round(el.getBoundingClientRect().width));
+    if (typeof ResizeObserver === 'undefined') return;
+    const ro = new ResizeObserver((es) => setW(Math.round(es[0].contentRect.width)));
+    ro.observe(el); return () => ro.disconnect();
+  }, []);
+  return w;
+}
+
+// ── 방식 고르기 ("작성 방식") ─────────────────────────
+// disabled: { C: '쓸 수 없는 이유' }. 막힌 방식은 눌러도 바뀌지 않고 이유만 보여 줘요.
+function WmModeSwitch({ value, onChange, disabled = {}, note }) {
+  const [why, setWhy] = useState(null);
+  const cur = WM_MODES.find((m) => m.key === value) || WM_MODES[0];
+  return html`<div class="wm-switch">
+    <div class="wm-switch-row">
+      <span class="wm-switch-label" aria-hidden="true">작성 방식</span>
+      <div class="seg wm-seg" role="group" aria-label="작성 방식">
+        ${WM_MODES.map((m) => {
+          const off = disabled[m.key];
+          return html`<button type="button" data-mode-key=${m.key} aria-pressed=${String(value === m.key)} aria-disabled=${off ? 'true' : null} title=${off || m.desc} aria-label=${`${m.key} ${m.name}${off ? ', 쓸 수 없어요' : ''}`}
+            onClick=${() => { if (off) { setWhy(why === m.key ? null : m.key); return; } setWhy(null); if (m.key !== value) onChange(m.key); }}>
+            <span class="wm-letter" aria-hidden="true">${m.key}</span><span class="wm-full">${m.name}</span><span class="wm-short">${m.short}</span>${off && html`<${Icon} name="lock" size="xs" cls="wm-lock" />`}
+          </button>`;
+        })}
+      </div>
+      <span class="wm-switch-desc small muted">${note || cur.desc}</span>
+    </div>
+    ${why && html`<div class="wm-why small" role="status"><${Icon} name="lock" size="xs" /><span>${WM_MODES.find((m) => m.key === why).name}: ${disabled[why]}</span></div>`}
+  </div>`;
+}
+
+// ── 영상 카드, 영상+자막 틀 (A, C) ────────────────────
+function WmPlayerCard({ player }) {
+  return html`<div class="card wm-player-card"><div class="wm-player-box"><${Player} player=${player} /></div><${PlayerControls} player=${player} /></div>`;
+}
+// 왼쪽(영상, 자막)은 화면에 붙어 있고 오른쪽에 내용이 와요. 좁으면 위아래로 쌓여요.
+function WmStudio({ player, children }) {
+  const scRef = useRef();
+  const cur = captionAt(player.short, player.t);
+  useEffect(() => {
+    const box = scRef.current; if (!box) return;
+    const el = box.querySelector('.transcript-line.on'); if (!el) return;
+    if (el.offsetTop < box.scrollTop || el.offsetTop + el.offsetHeight > box.scrollTop + box.clientHeight) box.scrollTop = Math.max(0, el.offsetTop - box.clientHeight / 3);
+  }, [cur && cur[0]]);
+  return html`<div class="wm-studio"><div class="wm-studio-grid">
+    <div class="wm-left">
+      <div class="card wm-player-card wm-studio-player"><div class="wm-player-box"><${Player} player=${player} /></div><${PlayerControls} player=${player} /></div>
+      <div class="card wm-tr-card">
+        <div class="wm-tr-head"><span class="strong grow">자막</span><span class="tiny muted">누르면 그 시점으로 가요</span></div>
+        <div class="wm-tr-scroll" ref=${scRef}><${Transcript} player=${player} /></div>
+      </div>
+    </div>
+    <div class="wm-right">${children}</div>
+  </div></div>`;
+}
+
+// 채점 포인트 (선생님): 태그 + 입력
+function WmKeyPoints({ value, onChange, label = '채점 포인트', hint = '학생 답에서 이 표현을 찾아 채점해요' }) {
+  const [kp, setKp] = useState('');
+  const list = value || [];
+  const add = () => { const k = kp.trim(); if (!k) return; onChange([...list, k]); setKp(''); };
+  return html`<div class="stack-sm">
+    <div class="row"><span class="label grow">${label}</span>${hint && html`<span class="tiny muted">${hint}</span>`}</div>
+    <div class="row-wrap" style=${{ gap: '6px' }}>
+      ${list.map((k, i) => html`<span class="tag">${k}<button type="button" onClick=${() => onChange(list.filter((_, j) => j !== i))} aria-label=${k + ' 지우기'}><${Icon} name="x" size="xs" /></button></span>`)}
+      <input class="input wm-kp-input" value=${kp} placeholder="+ 포인트 추가 (Enter)" aria-label="채점 포인트 추가" onInput=${(e) => setKp(e.target.value)} onKeyDown=${(e) => { if (e.key === 'Enter') { e.preventDefault(); add(); } }} onBlur=${add} />
+    </div>
+  </div>`;
+}
+function wmKeyPointsView(v) {
+  return (v.keyPoints || []).length ? html`<div class="row-wrap" style=${{ gap: '6px' }}><span class="tiny muted">채점 포인트</span>${v.keyPoints.map((k) => html`<span class="tag">${k}</span>`)}</div>` : null;
+}
+
+// ── A 워크벤치: 10개 항목을 한 화면에 ──────────────────
+// open/setOpen을 주지 않으면 처음에 모두 펼친 채로 스스로 기억해요.
+function WmWorkbench({ content, onChange, player, teacher, readOnly, probBy = {}, attempted, open, setOpen, idPrefix = 'wb', head, foot, title = '분석', counter }) {
+  const [own, setOwn] = useState(() => new Set(RUBRIC.map((i) => i.key)));
+  const o = open || own; const so = setOpen || setOwn;
+  const allOpen = o.size === RUBRIC.length;
+  const toggle = (key) => { const s = new Set(o); if (s.has(key)) s.delete(key); else s.add(key); so(s); };
+  return html`<div class="stack wm-wb" style=${{ gap: '10px' }}>
+    <div class="row-wrap wm-wb-head">
+      <span class="section-title">${title}</span><span class="badge badge-outline">양식 v1 · 10개 항목</span>${counter}
+      <span class="spacer"></span>
+      <button type="button" class="btn btn-ghost btn-sm" onClick=${() => so(allOpen ? new Set() : new Set(RUBRIC.map((i) => i.key)))}><${Icon} name=${allOpen ? 'chevU' : 'chevD'} size="xs" />${allOpen ? '모두 접기' : '모두 펼치기'}</button>
+    </div>
+    ${head}
+    ${RUBRIC.map((item) => html`<${WmItemCard} key=${item.key} item=${item} value=${content[item.key]} open=${o.has(item.key)} onToggle=${() => toggle(item.key)} onChange=${(v) => onChange(item.key, v)} player=${player} teacher=${teacher} problems=${probBy[item.key] || []} attempted=${attempted} readOnly=${readOnly} idPrefix=${idPrefix} />`)}
+    ${foot}
+  </div>`;
+}
+function WmItemCard({ item, value, open, onToggle, onChange, player, teacher, problems, attempted, readOnly, idPrefix }) {
+  const v = value || emptyAnswer(item);
+  const filled = isItemFilled(item, v);
+  const ok = readOnly || (teacher ? problems.length === 0 : filled);
+  const bad = teacher && !readOnly && attempted && !ok;
+  const preview = (item.kind === 'segments' ? (v.segments || []).map((s) => s.name).join(' → ') : '') || v.text || '';
+  const status = readOnly ? null
+    : ok ? html`<span class="wm-st ok"><${Icon} name="check" size="xs" />${teacher ? '작성됨' : '작성함'}</span>`
+    : bad ? html`<span class="wm-st bad">${problems.length}개 빠짐</span>`
+    : teacher && filled ? html`<span class="wm-st warn">${problems.length}개 더 채우기</span>`
+    : !teacher && wmHasAny(item, v) ? html`<span class="wm-st warn">덜 썼어요</span>`
+    : html`<span class="wm-st">아직 안 씀</span>`;
+  return html`<div class=${'card wm-item' + (open ? ' open' : '') + (bad ? ' bad' : '')} id=${idPrefix + '-item-' + item.key}>
+    <button type="button" class="wm-item-head" onClick=${onToggle} aria-expanded=${String(open)}>
+      <span class=${'item-num ' + (ok ? 'done' : 'todo')}>${item.n}</span>
+      <span class="grow stack-sm" style=${{ gap: '1px', minWidth: 0 }}>
+        <span class="row" style=${{ gap: '8px' }}><span class="strong">${item.title}</span><span class="badge desktop-only">${wmAreaName(item.area)}</span></span>
+        <span class=${'tiny muted' + (open ? '' : ' ellipsis')}>${open ? item.q : preview || item.help}</span>
+      </span>
+      ${status}
+      <${Icon} name=${open ? 'chevU' : 'chevD'} size="sm" />
+    </button>
+    ${open && html`<div class="wm-item-body">
+      ${readOnly ? html`<${ItemView} item=${item} value=${v} player=${player} />${teacher && wmKeyPointsView(v)}`
+        : html`<div class="wm-guide"><${Icon} name="bulb" size="sm" /><span>${item.guide}${teacher && html` <span class="muted">${item.scoring}</span>`}</span></div>
+          <${ItemEditor} item=${item} value=${v} onChange=${onChange} player=${player} teacher=${!!teacher} problems=${attempted ? problems : []} idPrefix=${idPrefix} />`}
+    </div>`}
+  </div>`;
+}
+
+// ── D 한 항목씩 ─────────────────────────────────────
+// step은 페이지가 갖고(onStep으로 바꿔요), endStep을 주면 10번 뒤에 마지막 단계(예: 게시)가 붙어요.
+// finish: { label, icon, disabled, onClick } 마지막에 누르는 버튼 (학생: 제출하기)
+function WmFocus({ player, content, onChange, teacher, step, onStep, idPrefix = 'wf', filledOf = isItemFilled, problemsOf = () => [], finish, endStep, headExtra, keysOff, countLabel = '채운 항목' }) {
+  const short = player.short;
+  const cardRef = useRef();
+  const n = RUBRIC.length;
+  const total = n + (endStep ? 1 : 0);
+  const cur = clamp(step || 0, 0, total - 1);
+  const onEnd = !!endStep && cur >= n;
+  const item = onEnd ? null : RUBRIC[cur];
+  const filled = RUBRIC.map((it) => !!filledOf(it, content[it.key]));
+  const nFilled = filled.filter(Boolean).length;
+  const lastItem = cur === n - 1;
+  const go = (i) => {
+    const s = clamp(i, 0, total - 1); if (s === cur) return;
+    onStep(s);
+    const el = cardRef.current;
+    if (el) { const top = el.getBoundingClientRect().top; if (top < 72) window.scrollBy({ top: top - 84, behavior: 'smooth' }); }
+  };
+  const keyRef = useRef();
+  keyRef.current = () => { if (keysOff) return; if (onEnd || (lastItem && !endStep)) { if (finish && !finish.disabled) finish.onClick(); } else go(cur + 1); };
+  useEffect(() => {
+    const k = (e) => { if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); keyRef.current(); } };
+    document.addEventListener('keydown', k); return () => document.removeEventListener('keydown', k);
+  }, []);
+  const prevItems = RUBRIC.slice(0, onEnd ? n : cur).filter((it) => filled[it.n - 1]).slice(-3);
+  const nextName = lastItem && endStep ? endStep.label : (RUBRIC[cur + 1] || {}).title;
+  const probs = item ? problemsOf(item.key) : [];
+  return html`<div class="wm-focus-wrap"><div class="wm-focus">
+    <div class="wm-focus-left">
+      <${WmPlayerCard} player=${player} />
+      <details class="card wm-fold">
+        <summary><${Icon} name="file" size="sm" /><span class="grow">자막 보기</span><span class="tiny muted">${short.transcript.length}줄</span><${Icon} name="chevD" size="sm" cls="wm-fold-chev" /></summary>
+        <div class="wm-fold-body"><${Transcript} player=${player} /></div>
+      </details>
+      ${prevItems.length > 0 && html`<div class="card wm-prev">
+        <span class="strong small">앞에서 쓴 내용</span>
+        ${prevItems.map((it) => html`<button type="button" class="wm-prev-item" onClick=${() => go(it.n - 1)}><span class="tiny muted">${it.n} ${it.title}</span><span class="small wm-clamp2">${wmAnswerLine(it, content[it.key]) || '–'}</span></button>`)}
+      </div>`}
+    </div>
+
+    <div class="stack" style=${{ gap: '14px', minWidth: 0 }}>
+      <nav class="card wm-stepper-card" aria-label="분석 항목">
+        <div class="row small" style=${{ marginBottom: '10px' }}><span class="strong grow">${onEnd ? endStep.label : `항목 ${cur + 1} / ${n}`}${headExtra}</span><span class="muted num">${countLabel} ${nFilled} / ${n}</span></div>
+        <div class="stepper" style=${{ gridTemplateColumns: `repeat(${total}, minmax(0, 1fr))` }}>
+          ${RUBRIC.map((it, i) => html`<button type="button" class=${(filled[i] ? 'done' : '') + (i === cur ? ' current' : '')} aria-current=${i === cur ? 'step' : null} aria-label=${`${it.n}. ${it.title}${filled[i] ? ', 작성함' : ''}`} title=${it.title} onClick=${() => go(i)}><span class="bar"></span><span class="lab">${it.n} ${it.short}</span></button>`)}
+          ${endStep && html`<button type="button" class=${(nFilled === n ? 'done' : '') + (onEnd ? ' current' : '')} aria-current=${onEnd ? 'step' : null} aria-label=${endStep.label} title=${endStep.label} onClick=${() => go(n)}><span class="bar"></span><span class="lab">${endStep.short || endStep.label}</span></button>`}
+        </div>
+      </nav>
+
+      ${onEnd ? html`<section class="card wm-item-card" ref=${cardRef} aria-label=${endStep.label}>${endStep.render(go)}</section>`
+      : html`<section class="card wm-item-card" ref=${cardRef} aria-labelledby=${idPrefix + '-item-q'}>
+        <div class="wm-item-top">
+          <span class="wm-item-kicker">${WM_CIRCLED[cur]} ${item.title}</span>
+          <span class="spacer"></span>
+          <span class="small muted num">${cur + 1} / ${n} · ${wmAreaName(item.area)}</span>
+        </div>
+        <div class="stack-sm" style=${{ gap: '6px' }}>
+          <h2 class="wm-item-q" id=${idPrefix + '-item-q'}>${item.q}</h2>
+          <p class="wm-item-help">${item.help}</p>
+        </div>
+        <details class="wm-guide-fold" key=${'g-' + item.key}><summary><${Icon} name="bulb" size="sm" /><span class="grow">작성 가이드</span><${Icon} name="chevD" size="sm" cls="wm-fold-chev" /></summary><p>${item.guide}${teacher && html` <span class="muted">${item.scoring}</span>`}</p></details>
+        <${ItemEditor} key=${item.key} item=${item} value=${content[item.key]} onChange=${(v) => onChange(item.key, v)} player=${player} teacher=${!!teacher} problems=${probs} idPrefix=${idPrefix} />
+        <div class="wm-item-nav">
+          <button type="button" class="btn" disabled=${cur === 0} onClick=${() => go(cur - 1)}><${Icon} name="arrowL" size="sm" />이전</button>
+          <span class="spacer"></span>
+          ${lastItem && !endStep && finish ? html`<button type="button" class="btn btn-primary" disabled=${finish.disabled} onClick=${finish.onClick}>${finish.label}<${Icon} name=${finish.icon || 'send'} size="sm" /></button>`
+            : html`<button type="button" class="btn btn-primary" onClick=${() => go(cur + 1)}><span>다음<span class="wm-next-name">: ${nextName}</span></span><${Icon} name="arrowR" size="sm" /></button>`}
+        </div>
+        <div class="wm-kbd desktop-only"><kbd>${WM_MAC ? '⌘' : 'Ctrl'}</kbd><kbd>Enter</kbd><span>${lastItem && !endStep ? (finish ? finish.label.replace(/하기$/, '') : '') : '다음 항목'}</span></div>
+      </section>`}
+    </div>
+  </div></div>`;
+}
+// 한 항목씩의 마지막 단계: 항목마다 준비됐는지 보여 주고, 누르면 그 항목으로 가요
+function WmFocusEnd({ kicker, title, desc, rows, onJump, onBack, action }) {
+  return html`<div class="stack" style=${{ gap: '16px' }}>
+    <div class="wm-item-top"><span class="wm-item-kicker">${kicker}</span></div>
+    <div class="stack-sm" style=${{ gap: '6px' }}><h2 class="wm-item-q">${title}</h2>${desc && html`<p class="wm-item-help">${desc}</p>`}</div>
+    <ul class="wm-end-list">
+      ${rows.map((r) => html`<li><button type="button" class="wm-end-row" onClick=${() => onJump(r.item.n - 1)}>
+        <span class=${'item-num ' + (r.ok ? 'done' : 'todo')}>${r.item.n}</span>
+        <span class="grow stack-sm" style=${{ gap: 0, minWidth: 0 }}><span class="strong small">${r.item.title}</span><span class=${'tiny ' + (r.ok ? 'muted ellipsis' : r.bad ? 'wm-bad' : 'muted')}>${r.note}</span></span>
+        ${r.ok ? html`<span class="wm-st ok"><${Icon} name="check" size="xs" />준비됨</span>` : html`<span class=${'wm-st ' + (r.bad ? 'bad' : 'warn')}>고치기</span>`}
+      </button></li>`)}
+    </ul>
+    <div class="wm-item-nav">
+      <button type="button" class="btn" onClick=${onBack}><${Icon} name="arrowL" size="sm" />이전</button>
+      <span class="spacer"></span>
+      ${action}
+    </div>
+  </div>`;
+}
+
+// ── B 타임라인 태깅 ─────────────────────────────────
+// 마커는 그 항목의 근거 시점(evidence)이고, 마커 설명은 근거의 label이에요. 구성 마커는 구간(segments)을 나눠요.
+const WM_TRACKS = [
+  { key: 'hook', label: '훅', btn: '훅', hot: 'H' },
+  { key: 'structure', label: '구성과 전개', btn: '구간', hot: 'S' },
+  { key: 'retention', label: '리텐션 장치', btn: '리텐션', hot: 'R' },
+  { key: 'editing', label: '편집', btn: '컷', hot: 'X' },
+  { key: 'audio', label: '오디오', btn: '오디오', hot: 'A' },
+  { key: 'cta', label: '마무리와 CTA', btn: 'CTA', hot: 'C' },
+];
+const WM_MEMO = ['target', 'message', 'success', 'improve'];
+const WM_ZOOMS = [1, 1.5, 2, 3, 4];
+const WM_SEG_NAMES = ['도입', '전개', '결말', '반전', '마무리'];
+const wmTrack = (key) => WM_TRACKS.find((t) => t.key === key) || null;
+
+// focus: { key, n } 가 바뀌면 그 항목을 골라 오른쪽 패널을 보여 줘요 (게시 검사, 제출 확인에서 바로 가기)
+function WmTimeline({ player, content, onChange, teacher, filledN, probBy = {}, attempted, focus, idPrefix = 'tl', head }) {
+  const short = player.short;
+  const dur = Math.max(1, player.duration || short.durationSec || 1);
+  const maxT = Math.max(0, Math.floor(dur));
+  const [sel, setSel] = useState(null); // { key, kind: 'ev' | 'seg' | 'item', idx }
+  const [zoom, setZoom] = useState(0);
+  const [drag, setDrag] = useState(null);
+  const [note, setNote] = useState('');
+  const boxRef = useRef(); const panelRef = useRef(); const dragRef = useRef(null); const scrubRef = useRef(false); const skipClick = useRef(false);
+  const boxW = useWmWidth(boxRef);
+  const narrow = boxW > 0 && boxW < 600;
+  const labelW = narrow ? 92 : 150;
+  const trackW = Math.max(narrow ? 560 : 600, Math.round(((boxW || 900) - labelW - 28) * WM_ZOOMS[zoom]));
+  const X = (t) => (clamp(t, 0, dur) / dur) * trackW;
+
+  const val = (key) => ({ ...emptyAnswer(wmItem(key)), ...(content[key] || {}) });
+  const set = (key, patch) => onChange(key, { ...val(key), ...patch });
+  const evOf = (key) => (content[key] && content[key].evidence) || [];
+  const segsOf = () => (content.structure && content.structure.segments) || [];
+
+  // 모든 마커를 시간순으로 (이전, 다음 마커)
+  const all = [];
+  WM_TRACKS.forEach((tr, ti) => {
+    if (tr.key === 'structure') segsOf().forEach((s, i) => all.push({ key: tr.key, kind: 'seg', idx: i, t: s.start, ti }));
+    else evOf(tr.key).forEach((e, i) => all.push({ key: tr.key, kind: 'ev', idx: i, t: e.t, ti }));
+  });
+  all.sort((a, b) => a.t - b.t || a.ti - b.ti || a.idx - b.idx);
+  const rawIdx = sel && sel.kind !== 'item' ? all.findIndex((m) => m.key === sel.key && m.kind === sel.kind && m.idx === sel.idx) : -1;
+  const cs = !sel ? null : sel.kind === 'item' || rawIdx >= 0 ? sel : { key: sel.key, kind: 'item' }; // 지워진 마커면 항목 선택으로
+  const selIdx = cs && cs.kind !== 'item' ? rawIdx : -1;
+  const prevM = selIdx >= 0 ? all[selIdx - 1] : all.filter((m) => m.t < Math.floor(player.t)).pop();
+  const nextM = selIdx >= 0 ? all[selIdx + 1] : all.find((m) => m.t > Math.floor(player.t));
+  const pick = (m, seek = true) => { setSel({ key: m.key, kind: m.kind, idx: m.idx }); if (seek) player.seek(m.t); };
+
+  const addMarker = (key) => {
+    const tr = wmTrack(key); if (!tr) return;
+    const t = clamp(player.nowSec(), 0, maxT);
+    if (key === 'structure') {
+      const segs = segsOf().slice().sort((a, b) => a.start - b.start);
+      const same = segs.findIndex((s) => s.start === t);
+      if (same >= 0) { set(key, { segments: segs }); setSel({ key, kind: 'seg', idx: same }); setNote(`${fmtTime(t)}에는 이미 구간이 있어요`); return; }
+      const ns = { name: WM_SEG_NAMES[segs.length ? segs.length : 1] || `구간 ${segs.length + 1}`, start: t, text: '' };
+      const next = segs.length ? [...segs, ns] : t > 0 ? [{ name: WM_SEG_NAMES[0], start: 0, text: '' }, ns] : [{ ...ns, name: WM_SEG_NAMES[0] }];
+      next.sort((a, b) => a.start - b.start);
+      set(key, { segments: next });
+      setSel({ key, kind: 'seg', idx: next.findIndex((s) => s.start === t) });
+      setNote(`${fmtTime(t)}에서 구간을 나눴어요`);
+      return;
+    }
+    const evs = evOf(key);
+    const same = evs.findIndex((e) => e.t === t);
+    if (same >= 0) { setSel({ key, kind: 'ev', idx: same }); setNote(`${fmtTime(t)}에는 이미 ${tr.label} 마커가 있어요`); return; }
+    const cap = captionAt(short, t);
+    const ne = { t, label: cap ? cap[1] : '' };
+    const next = [...evs, ne].sort((a, b) => a.t - b.t);
+    set(key, { evidence: next });
+    setSel({ key, kind: 'ev', idx: next.indexOf(ne) });
+    setNote(`${tr.label} 마커를 ${fmtTime(t)}에 찍었어요`);
+  };
+  const setEvTime = (key, idx, t) => {
+    const evs = evOf(key).slice(); if (!evs[idx]) return;
+    const e = { ...evs[idx], t: clamp(Math.round(t), 0, maxT) };
+    evs[idx] = e; evs.sort((a, b) => a.t - b.t);
+    set(key, { evidence: evs }); setSel({ key, kind: 'ev', idx: evs.indexOf(e) });
+  };
+  const setEv = (key, idx, patch) => set(key, { evidence: evOf(key).map((e, i) => (i === idx ? { ...e, ...patch } : e)) });
+  const setSegStart = (idx, t) => {
+    const segs = segsOf().slice(); if (!segs[idx]) return;
+    const s = { ...segs[idx], start: clamp(Math.round(t), 0, maxT) };
+    segs[idx] = s; segs.sort((a, b) => a.start - b.start);
+    set('structure', { segments: segs }); setSel({ key: 'structure', kind: 'seg', idx: segs.indexOf(s) });
+  };
+  const setSeg = (idx, patch) => set('structure', { segments: segsOf().map((s, i) => (i === idx ? { ...s, ...patch } : s)) });
+  const removeSel = () => {
+    if (!cs) return;
+    if (cs.kind === 'ev') set(cs.key, { evidence: evOf(cs.key).filter((_, i) => i !== cs.idx) });
+    else if (cs.kind === 'seg') {
+      const segs = segsOf().slice().sort((a, b) => a.start - b.start);
+      const gone = segsOf()[cs.idx];
+      let rest = segs.filter((s) => s !== gone);
+      if (gone && gone.start === 0 && rest.length) rest = [{ ...rest[0], start: 0 }, ...rest.slice(1)];
+      set('structure', { segments: rest });
+    }
+    setSel({ key: cs.key, kind: 'item' });
+    setNote(cs.kind === 'seg' ? '구간을 지웠어요. 앞 구간이 이어져요' : '마커를 지웠어요');
+  };
+
+  // 끌어서 시점 옮기기 (마커, 구간 경계)
+  const dragProps = (m) => ({
+    onPointerDown: (e) => {
+      if (e.button != null && e.button !== 0) return;
+      const lane = e.currentTarget.closest('.wm-tl-lane');
+      dragRef.current = { m, x0: e.clientX, w: lane ? lane.getBoundingClientRect().width : trackW, moved: false, t: m.t };
+      try { e.currentTarget.setPointerCapture(e.pointerId); } catch {}
+    },
+    onPointerMove: (e) => {
+      const d = dragRef.current; if (!d) return;
+      const dx = e.clientX - d.x0;
+      if (!d.moved && Math.abs(dx) < 4) return;
+      d.moved = true;
+      let t = clamp(Math.round(d.m.t + (dx / d.w) * dur), 0, maxT);
+      if (d.m.kind === 'seg') {
+        const segs = segsOf().slice().sort((a, b) => a.start - b.start); const me = segsOf()[d.m.idx]; const j = segs.indexOf(me);
+        const lo = j > 0 ? segs[j - 1].start + 1 : 0; const hi = j < segs.length - 1 ? segs[j + 1].start - 1 : maxT;
+        t = clamp(t, lo, Math.max(lo, hi));
+      }
+      d.t = t; setDrag({ key: d.m.key, kind: d.m.kind, idx: d.m.idx, t });
+    },
+    onPointerUp: () => {
+      const d = dragRef.current; dragRef.current = null; if (!d || !d.moved) return;
+      skipClick.current = true; setTimeout(() => { skipClick.current = false; }, 0);
+      setDrag(null);
+      if (d.t !== d.m.t) { if (d.m.kind === 'seg') setSegStart(d.m.idx, d.t); else setEvTime(d.m.key, d.m.idx, d.t); }
+      else setSel({ key: d.m.key, kind: d.m.kind, idx: d.m.idx });
+      player.seek(d.t);
+    },
+    onPointerCancel: () => { dragRef.current = null; setDrag(null); },
+    onKeyDown: (e) => {
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+      e.preventDefault(); const t = m.t + (e.key === 'ArrowLeft' ? -1 : 1);
+      if (m.kind === 'seg') setSegStart(m.idx, t); else setEvTime(m.key, m.idx, t);
+      player.seek(clamp(t, 0, maxT));
+    },
+  });
+  const onMarkerClick = (e, m) => { e.stopPropagation(); if (skipClick.current) { skipClick.current = false; return; } pick(m); };
+  const seekAt = (e, el) => { const r = el.getBoundingClientRect(); player.seek(clamp((e.clientX - r.left) / Math.max(1, r.width), 0, 1) * dur); };
+  const onLane = (e) => { if (e.target === e.currentTarget || (e.target.classList && e.target.classList.contains('wm-cut'))) seekAt(e, e.currentTarget); };
+
+  // 단축키: H S R X A C (글을 쓰는 중에는 무시), Space 재생
+  const keyRef = useRef();
+  keyRef.current = (e) => {
+    if (e.metaKey || e.ctrlKey || e.altKey || e.isComposing) return;
+    if (wmTyping(e.target) || wmTyping(document.activeElement)) return;
+    if (document.querySelector('.modal-wrap')) return;
+    const code = e.code || ''; const k = code.startsWith('Key') ? code.slice(3) : String(e.key || '').toUpperCase();
+    const tr = WM_TRACKS.find((x) => x.hot === k);
+    if (tr) { e.preventDefault(); addMarker(tr.key); return; }
+    if ((code === 'Space' || e.key === ' ') && (e.target === document.body || !e.target || e.target === document.documentElement)) { e.preventDefault(); player.toggle(); }
+  };
+  useEffect(() => { const h = (e) => keyRef.current(e); document.addEventListener('keydown', h); return () => document.removeEventListener('keydown', h); }, []);
+  useEffect(() => { if (!note) return; const id = setTimeout(() => setNote(''), 2600); return () => clearTimeout(id); }, [note]);
+  // 다른 화면에서 바로 가기
+  useEffect(() => {
+    if (!focus) return;
+    // 구성과 전개는 설명이 빈 첫 구간을 바로 골라요
+    const segs = focus.key === 'structure' ? ((content.structure || {}).segments || []) : [];
+    const empty = segs.findIndex((x) => !String(x.text || '').trim());
+    setSel(empty >= 0 ? { key: 'structure', kind: 'seg', idx: empty } : { key: focus.key, kind: 'item' });
+    setTimeout(() => { const el = panelRef.current; if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 80);
+  }, [focus && focus.n]);
+  // 재생 중이면 재생 위치를 따라 타임라인을 옮겨요
+  useEffect(() => {
+    const box = boxRef.current; if (!box || !player.playing) return;
+    const x = labelW + X(player.t); const lo = box.scrollLeft + labelW; const hi = box.scrollLeft + box.clientWidth - 30;
+    if (x < lo || x > hi) box.scrollLeft = Math.max(0, x - labelW - (box.clientWidth - labelW) * 0.25);
+  }, [Math.floor(player.t), player.playing, trackW]);
+  // 고른 마커가 안 보이면 보이게
+  useEffect(() => {
+    const box = boxRef.current; if (!box || selIdx < 0) return;
+    const x = labelW + X(all[selIdx].t); const lo = box.scrollLeft + labelW + 10; const hi = box.scrollLeft + box.clientWidth - 60;
+    if (x < lo || x > hi) box.scrollLeft = Math.max(0, x - labelW - 40);
+  }, [cs && cs.key, cs && cs.kind, cs && cs.idx, trackW]);
+
+  const cur = captionAt(short, player.t);
+  const pps = trackW / dur;
+  const step = [1, 2, 5, 10, 15, 30, 60].find((s) => s * pps >= 48) || 60;
+  const ticks = []; for (let s = 0; s < dur - step * 0.6; s += step) ticks.push(s);
+  const cuts = (short.cuts || []).filter((c) => c > 0 && c < dur);
+  const memoFilled = WM_MEMO.filter((k) => isItemFilled(wmItem(k), content[k])).length;
+  const sumFilled = WM_TRACKS.filter((tr) => ((content[tr.key] || {}).text || '').trim()).length;
+  const probs = (key) => (attempted ? probBy[key] || [] : []);
+
+  // ── 트랙 한 줄 ──
+  const labCell = (tr, sub) => {
+    const on = cs && cs.key === tr.key; const bad = probs(tr.key).length > 0;
+    return html`<button type="button" class=${'wm-tl-lab' + (on ? ' on' : '') + (bad ? ' bad' : '')} style=${{ width: labelW + 'px' }} onClick=${() => setSel({ key: tr.key, kind: 'item' })} title=${`${tr.label} 항목 고르기`}>
+      <span class="wm-tl-lab-name ellipsis">${tr.label}</span><span class="wm-tl-lab-sub ellipsis">${sub}</span>
+    </button>`;
+  };
+  const pointLane = (key) => {
+    const evs = evOf(key).map((e, i) => ({ ...e, i })).sort((a, b) => a.t - b.t);
+    return evs.map((e, j) => {
+      const isDrag = drag && drag.kind === 'ev' && drag.key === key && drag.idx === e.i;
+      const t = isDrag ? drag.t : e.t; const x = X(t);
+      const on = cs && cs.kind === 'ev' && cs.key === key && cs.idx === e.i;
+      const flip = x > trackW - 150;
+      const room = flip ? (j > 0 ? x - X(evs[j - 1].t) : x + 40) : (j < evs.length - 1 ? X(evs[j + 1].t) - x : trackW + 200 - x);
+      const maxW = on || isDrag ? 220 : clamp(room - 30, 0, 150);
+      const m = { key, kind: 'ev', idx: e.i, t: e.t };
+      return html`<button type="button" class=${'wm-mk' + (on ? ' on' : '') + (flip ? ' flip' : '') + (isDrag ? ' drag' : '')} style=${{ left: x + 'px' }}
+        aria-label=${`${wmTrack(key).label} 마커 ${fmtTime(t)}${e.label ? ', ' + e.label : ''}`} aria-pressed=${String(!!on)} title=${`${fmtTime(t)} ${e.label || ''}`}
+        ...${dragProps(m)} onClick=${(ev) => onMarkerClick(ev, m)}>
+        <span class="wm-mk-dot"></span>${maxW >= 24 && html`<span class="wm-mk-lab" style=${{ maxWidth: maxW + 'px' }}>${e.label || fmtTime(t)}</span>`}
+      </button>`;
+    });
+  };
+  const segLane = () => {
+    const segs = segsOf().map((s, i) => ({ ...s, i })).sort((a, b) => a.start - b.start);
+    const startOf = (s) => (drag && drag.kind === 'seg' && drag.idx === s.i ? drag.t : s.start);
+    return segs.map((s, j) => {
+      const st = startOf(s); const en = j < segs.length - 1 ? startOf(segs[j + 1]) : dur;
+      const x = X(st); const w = Math.max(6, X(en) - x - 2);
+      const on = cs && cs.kind === 'seg' && cs.idx === s.i;
+      const m = { key: 'structure', kind: 'seg', idx: s.i, t: s.start };
+      return html`<button type="button" class=${'wm-sgm tone' + (j % 3) + (on ? ' on' : '') + (teacher && attempted && !String(s.text || '').trim() ? ' bad' : '')} style=${{ left: x + 'px', width: w + 'px' }} aria-pressed=${String(!!on)}
+          aria-label=${`구간 ${s.name} ${fmtTime(st)}부터`} title=${`${s.name} ${fmtTime(st)}~${fmtTime(en)}${s.text ? ' · ' + s.text : ''}`} onClick=${(ev) => onMarkerClick(ev, m)}>
+          <span class="ellipsis">${s.name}${s.text ? html`<span class="wm-sgm-sub"> · ${s.text}</span>` : ''}</span>
+        </button>
+        ${j > 0 && html`<span class=${'wm-sgm-handle' + (on ? ' on' : '')} style=${{ left: x + 'px' }} role="slider" tabIndex="0" aria-label=${`${s.name} 시작 시점, 좌우로 끌어서 옮겨요`} aria-valuemin="0" aria-valuemax=${maxT} aria-valuenow=${st} ...${dragProps(m)} onClick=${(ev) => onMarkerClick(ev, m)}></span>`}`;
+    });
+  };
+
+  // ── 고른 마커, 항목 패널 ──
+  const itemSection = (key) => {
+    const item = wmItem(key); const v = val(key); const memo = WM_MEMO.includes(key); const p = probs(key);
+    return html`<div class="stack-sm wm-tl-item" style=${{ gap: '10px' }}>
+      ${item.kind === 'hook' && html`<div class="stack-sm">
+        <span class="label">훅 유형</span>
+        <div class="row-wrap" style=${{ gap: '6px' }} role="group" aria-label="훅 유형">${HOOK_TYPES.map((h) => html`<button type="button" class="chip" aria-pressed=${String(v.hookType === h)} onClick=${() => set(key, { hookType: v.hookType === h ? '' : h })}>${h}</button>`)}</div>
+      </div>`}
+      <div class="field">
+        <label class="label" for=${`${idPrefix}-tl-${key}-text`}>${item.kind === 'segments' ? '흐름 한 줄 요약 (선택)' : `${item.title} 요약`}</label>
+        <textarea id=${`${idPrefix}-tl-${key}-text`} class="textarea" rows="2" value=${v.text || ''} placeholder=${item.help} onInput=${(e) => set(key, { text: e.target.value })}></textarea>
+      </div>
+      ${memo && item.evidence && html`<div class="stack-sm">
+        <span class="label">근거 시점</span>
+        <div class="row-wrap" style=${{ gap: '6px' }}>
+          ${(v.evidence || []).map((e, i) => html`<${TimeTag} e=${e} onSeek=${(t) => player.seekPlay(t)} onRemove=${() => set(key, { evidence: v.evidence.filter((_, j) => j !== i) })} />`)}
+          <button type="button" class="btn btn-sm" onClick=${() => { const t = clamp(player.nowSec(), 0, maxT); const c = captionAt(short, t); set(key, { evidence: [...(v.evidence || []).filter((e) => e.t !== t), { t, label: c ? c[1] : '' }].sort((a, b) => a.t - b.t) }); }}><${Icon} name="timer" size="xs" />지금 시점 넣기 <span class="mono muted">${fmtTime(player.t)}</span></button>
+        </div>
+      </div>`}
+      ${teacher && html`<${WmKeyPoints} key=${key} value=${v.keyPoints} onChange=${(kp) => set(key, { keyPoints: kp })} />`}
+      ${p.length > 0 && html`<div class="error-text">${p.map((x) => x.msg).join(', ')}</div>`}
+    </div>`;
+  };
+  const panel = () => {
+    const nav2 = html`<div class="row" style=${{ gap: '6px' }}>
+      <button type="button" class="btn btn-sm" disabled=${!prevM} onClick=${() => prevM && pick(prevM)}><${Icon} name="chevL" size="xs" />이전 마커</button>
+      <button type="button" class="btn btn-sm" disabled=${!nextM} onClick=${() => nextM && pick(nextM)}>다음 마커<${Icon} name="chevR" size="xs" /></button>
+    </div>`;
+    if (!cs) return html`<div class="wm-tl-panel-head"><span class="tiny muted grow">선택한 마커</span>${nav2}</div>
+      <div class="wm-tl-empty">
+        <${Icon} name="flag" size="lg" />
+        <div class="strong">마커를 고르면 여기서 설명과 시점을 고칠 수 있어요</div>
+        <div class="small muted">영상을 보다가 <kbd>H</kbd> <kbd>S</kbd> <kbd>R</kbd> <kbd>X</kbd> <kbd>A</kbd> <kbd>C</kbd> 키나 타임라인 위 버튼을 누르면 지금 시점에 마커가 찍혀요.</div>
+      </div>`;
+    const item = wmItem(cs.key); const tr = wmTrack(cs.key);
+    if (cs.kind === 'ev') {
+      const e = evOf(cs.key)[cs.idx];
+      return html`<div class="wm-tl-panel-head">
+          <div class="stack-sm grow" style=${{ gap: 0 }}><span class="tiny muted">선택한 마커</span><h3 class="wm-tl-h3">${tr.label} <span class="mono wm-tl-time">${fmtTime(e.t)}</span></h3></div>
+          ${nav2}
+        </div>
+        <div class="field"><label class="label" for="wm-tl-note">마커 설명</label>
+          <textarea id="wm-tl-note" class="textarea" rows="2" value=${e.label || ''} placeholder="이 시점에 무슨 일이 있나요?" onInput=${(x) => setEv(cs.key, cs.idx, { label: x.target.value })}></textarea></div>
+        <div class="row-wrap" style=${{ gap: '8px' }}>
+          <span class="label">시점</span>
+          <${TimeInput} value=${e.t} label="마커 시점" onChange=${(t) => setEvTime(cs.key, cs.idx, t)} />
+          <button type="button" class="btn btn-sm" onClick=${() => setEvTime(cs.key, cs.idx, player.nowSec())} title="지금 재생 위치로"><${Icon} name="timer" size="xs" />지금</button>
+          <span class="spacer"></span>
+          <button type="button" class="btn btn-sm btn-ghost btn-danger" onClick=${removeSel}><${Icon} name="trash" size="xs" />마커 삭제</button>
+        </div>
+        <span class="tiny muted">마커를 좌우로 끌거나, 고른 뒤 ← → 키로 1초씩 옮길 수 있어요</span>
+        <div class="divider"></div>
+        ${itemSection(cs.key)}`;
+    }
+    if (cs.kind === 'seg') {
+      const segs = segsOf(); const s = segs[cs.idx];
+      const sorted = segs.slice().sort((a, b) => a.start - b.start); const j = sorted.indexOf(s); const en = j < sorted.length - 1 ? sorted[j + 1].start : dur;
+      return html`<div class="wm-tl-panel-head">
+          <div class="stack-sm grow" style=${{ gap: 0 }}><span class="tiny muted">선택한 구간</span><h3 class="wm-tl-h3">${s.name || '구간'} <span class="mono wm-tl-time">${fmtTime(s.start)}~${fmtTime(en)}</span></h3></div>
+          ${nav2}
+        </div>
+        <div class="row-wrap" style=${{ gap: '8px' }}>
+          <input class="input wm-sgm-name" value=${s.name} aria-label="구간 이름" onInput=${(x) => setSeg(cs.idx, { name: x.target.value })} />
+          <span class="label">시작</span>
+          <${TimeInput} value=${s.start} label="구간 시작 시점" onChange=${(t) => setSegStart(cs.idx, t)} />
+          <button type="button" class="btn btn-sm" onClick=${() => setSegStart(cs.idx, player.nowSec())}><${Icon} name="timer" size="xs" />지금</button>
+        </div>
+        <div class="field"><label class="label" for="wm-tl-segtext">이 구간이 하는 일</label>
+          <textarea id="wm-tl-segtext" class="textarea" rows="2" value=${s.text || ''} placeholder="예: 완성된 모습을 먼저 보여 줘요" onInput=${(x) => setSeg(cs.idx, { text: x.target.value })}></textarea></div>
+        <div class="row-wrap" style=${{ gap: '8px' }}>
+          <span class="tiny muted grow">구간 왼쪽 끝을 끌어 시작 시점을 옮겨요</span>
+          <button type="button" class="btn btn-sm btn-ghost btn-danger" onClick=${removeSel}><${Icon} name="trash" size="xs" />구간 지우기</button>
+        </div>
+        <div class="divider"></div>
+        ${itemSection('structure')}`;
+    }
+    const memo = WM_MEMO.includes(cs.key);
+    const count = !tr ? 0 : cs.key === 'structure' ? segsOf().length : evOf(cs.key).length;
+    return html`<div class="wm-tl-panel-head">
+        <div class="stack-sm grow" style=${{ gap: 0 }}><span class="tiny muted">${memo ? '영상 전체 메모' : '선택한 트랙'}</span><h3 class="wm-tl-h3">${item.n}. ${item.title}</h3></div>
+        ${nav2}
+      </div>
+      ${tr ? html`<div class="row-wrap wm-tl-note-row">
+          <span class="small soft grow">${count ? `${cs.key === 'structure' ? '구간' : '마커'} ${count}개 · 타임라인에서 눌러 고쳐요` : '아직 이 트랙에 마커가 없어요'}</span>
+          <button type="button" class="btn btn-sm" onClick=${() => addMarker(cs.key)}><${Icon} name="plus" size="xs" />지금 시점에 찍기 <kbd>${tr.hot}</kbd></button>
+        </div>`
+      : html`<span class="small soft">시간과 상관없는 항목이에요. 영상 전체를 보고 적어요.</span>`}
+      ${itemSection(cs.key)}`;
+  };
+
+  return html`<div class="wm-tl">
+    ${head}
+    <div class="wm-tl-layout">
+      <div class="wm-tl-player"><${WmPlayerCard} player=${player} /></div>
+
+      <section class=${'card wm-tl-panel' + (cs ? ' focus' : '')} ref=${panelRef} aria-label="선택한 마커">${panel()}</section>
+
+      <section class="card wm-tl-memo" aria-labelledby=${idPrefix + '-memo-h'}>
+        <div class="row wm-tl-memo-head"><h3 class="wm-tl-h3 grow" id=${idPrefix + '-memo-h'}>영상 전체 메모</h3><span class="small muted">시간과 상관없는 항목 · ${memoFilled}/4</span></div>
+        <div class="wm-tl-memo-grid">
+          ${WM_MEMO.map((key) => {
+            const item = wmItem(key); const v = val(key); const p = probs(key);
+            const more = teacher ? `채점 포인트 ${(v.keyPoints || []).length}` : item.evidence ? `근거 시점 ${(v.evidence || []).length}` : '';
+            return html`<div class="field wm-memo-field">
+              <div class="row" style=${{ gap: '6px' }}><label class="label grow" for=${`${idPrefix}-memo-${key}`}>${item.title}</label>
+                ${more && html`<button type="button" class=${'btn btn-ghost btn-sm wm-memo-more' + (cs && cs.key === key ? ' on' : '')} onClick=${() => { setSel({ key, kind: 'item' }); if (narrow) setTimeout(() => panelRef.current && panelRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60); }}>${more}<${Icon} name="chevR" size="xs" /></button>`}</div>
+              <textarea id=${`${idPrefix}-memo-${key}`} class="textarea" rows="2" value=${v.text || ''} placeholder=${item.q} aria-invalid=${p.length ? 'true' : null} onInput=${(e) => set(key, { text: e.target.value })}></textarea>
+              ${p.length > 0 && html`<div class="error-text">${p.map((x) => x.msg).join(', ')}</div>`}
+            </div>`;
+          })}
+        </div>
+        <details class="wm-tl-sums">
+          <summary><${Icon} name="list" size="sm" /><span class="grow">타임라인 항목 요약</span><span class="small muted">${sumFilled}/6</span><${Icon} name="chevD" size="sm" cls="wm-fold-chev" /></summary>
+          <div class="wm-tl-memo-grid">
+            ${WM_TRACKS.map((tr) => { const item = wmItem(tr.key); const v = val(tr.key); return html`<div class="field">
+              <label class="label" for=${`${idPrefix}-sum-${tr.key}`}>${item.title}${item.kind === 'hook' && v.hookType ? ` · ${v.hookType}` : ''}</label>
+              <textarea id=${`${idPrefix}-sum-${tr.key}`} class="textarea" rows="2" value=${v.text || ''} placeholder=${item.help} onInput=${(e) => set(tr.key, { text: e.target.value })}></textarea>
+            </div>`; })}
+          </div>
+        </details>
+      </section>
+
+      <section class="card wm-tl-card" aria-label="타임라인">
+        <div class="wm-tl-bar">
+          <button type="button" class="wm-tl-play" onClick=${player.toggle} aria-label=${player.playing ? '멈춤' : '재생'}><${Icon} name=${player.playing ? 'pause' : 'play'} size="sm" /></button>
+          <span class="mono small num">${fmtTime(player.t)} / ${fmtTime(dur)}</span>
+          <button type="button" class="btn btn-sm btn-icon" aria-label="타임라인 축소" disabled=${zoom === 0} onClick=${() => setZoom(Math.max(0, zoom - 1))}><${Icon} name="minus" size="xs" /></button>
+          <button type="button" class="btn btn-sm btn-icon" aria-label="타임라인 확대" disabled=${zoom === WM_ZOOMS.length - 1} onClick=${() => setZoom(Math.min(WM_ZOOMS.length - 1, zoom + 1))}><${Icon} name="plus" size="xs" /></button>
+          <span class="spacer"></span>
+          <span class="badge wm-tl-count">${filledN}/10 항목</span>
+        </div>
+        <div class="wm-tl-adds" role="group" aria-label="지금 시점에 마커 찍기">
+          <span class="tiny muted wm-tl-adds-label">지금 시점에 찍기</span>
+          ${WM_TRACKS.map((tr) => html`<button type="button" class="btn btn-sm wm-tl-add" data-track=${tr.key} title=${`${tr.label} 마커 찍기 (${tr.hot})`} onClick=${() => addMarker(tr.key)}><kbd>${tr.hot}</kbd>${tr.btn}</button>`)}
+          <span class="tiny wm-tl-flash" aria-live="polite">${note}</span>
+        </div>
+        ${narrow && html`<p class="wm-tl-hint small"><${Icon} name="info" size="xs" />타임라인은 큰 화면에서 쓰기 편해요. 좌우로 밀어서 볼 수 있어요.</p>`}
+        <div class="wm-tl-scroll" ref=${boxRef}>
+          <div class="wm-tl-grid" style=${{ width: labelW + trackW + 28 + 'px' }}>
+            <div class="wm-tl-row wm-tl-ruler-row">
+              <div class="wm-tl-lab wm-tl-lab-blank" style=${{ width: labelW + 'px' }}></div>
+              <div class="wm-tl-ruler" style=${{ width: trackW + 'px' }} role="slider" aria-label="재생 위치" aria-valuemin="0" aria-valuemax=${maxT} aria-valuenow=${Math.floor(player.t)}
+                onPointerDown=${(e) => { scrubRef.current = true; try { e.currentTarget.setPointerCapture(e.pointerId); } catch {} seekAt(e, e.currentTarget); }}
+                onPointerMove=${(e) => { if (scrubRef.current) seekAt(e, e.currentTarget); }}
+                onPointerUp=${() => { scrubRef.current = false; }} onPointerCancel=${() => { scrubRef.current = false; }}>
+                ${ticks.map((s) => html`<span class=${'wm-tick' + (s === 0 ? ' first' : '')} style=${{ left: X(s) + 'px' }}>${fmtTime(s)}</span>`)}
+                <span class="wm-tick last" style=${{ left: trackW + 'px' }}>${fmtTime(dur)}</span>
+                <span class="wm-tl-now" style=${{ left: clamp(X(player.t), 22, trackW - 22) + 'px' }}>${fmtTime(player.t)}</span>
+              </div>
+            </div>
+            <div class="wm-tl-row">
+              <div class="wm-tl-lab wm-tl-lab-static" style=${{ width: labelW + 'px' }}><span class="wm-tl-lab-name">자막</span><span class="wm-tl-lab-sub">자동</span></div>
+              <div class="wm-tl-lane" style=${{ width: trackW + 'px' }} onClick=${onLane}>
+                ${short.transcript.map((l, i) => { const en = i < short.transcript.length - 1 ? short.transcript[i + 1][0] : dur; const x = X(l[0]); return html`<button type="button" tabIndex="-1" class=${'wm-cap' + (cur === l ? ' on' : '')} style=${{ left: x + 'px', width: Math.max(4, X(en) - x - 2) + 'px' }} title=${`${fmtTime(l[0])} ${l[1]}`} onClick=${(e) => { e.stopPropagation(); player.seek(l[0]); }}>${l[1]}</button>`; })}
+              </div>
+            </div>
+            ${WM_TRACKS.map((tr) => {
+              const v = content[tr.key] || {};
+              const n = tr.key === 'structure' ? (v.segments || []).length : (v.evidence || []).length;
+              const sub = tr.key === 'hook' ? `${v.hookType || '유형 미정'} · ${n}개`
+                : tr.key === 'structure' ? `${n}구간`
+                : tr.key === 'editing' ? `${cuts.length}컷 · 평균 ${(dur / (cuts.length + 1)).toFixed(1)}초`
+                : `${n}개`;
+              return html`<div class=${'wm-tl-row' + (cs && cs.key === tr.key ? ' on' : '')} data-track=${tr.key}>
+                ${labCell(tr, sub)}
+                <div class="wm-tl-lane" style=${{ width: trackW + 'px' }} onClick=${onLane}>
+                  ${tr.key === 'editing' && cuts.map((c) => html`<span class="wm-cut" style=${{ left: X(c) + 'px' }} title=${`컷 ${fmtTime(c)}`}></span>`)}
+                  ${tr.key === 'structure' ? segLane() : pointLane(tr.key)}
+                </div>
+              </div>`;
+            })}
+            <div class="wm-tl-head" style=${{ left: labelW + X(player.t) + 'px' }} aria-hidden="true"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>`;
+}
 
 
 // ===== pages-student.js =====
 // ── 학생 화면: 홈, 쇼츠 분석 배우기, 분석 작성, 채점 결과 (스펙 0010 "학생 화면") ──
 
 // ── 도우미 ─────────────────────────────────────────
-const ST_CIRCLED = '①②③④⑤⑥⑦⑧⑨⑩';
 function stAreaName(key) { const a = AREAS.find((x) => x.key === key); return a ? a.name : ''; }
 function stScoreCls(v) { return v >= 75 ? 'badge-ok' : v >= 50 ? 'badge-role' : 'badge-bad'; }
 function stGradeShort(v) { return v >= 85 ? '아주 좋아요' : v >= 70 ? '좋아요' : v >= 50 ? '보통이에요' : '더 연습해요'; }
-const ST_MAC = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent || '');
 function stGrade(v) { return v >= 85 ? '아주 잘했어요' : v >= 70 ? '잘했어요' : v >= 50 ? '조금만 더 연습해요' : '다시 도전해 봐요'; }
 function stWeakest(areas) { return AREAS.slice().sort((a, b) => areas[a.key] - areas[b.key])[0]; }
 function stMySubs(userId) { return db.submissions.filter((s) => s.userId === userId).sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0)); }
@@ -3090,11 +3900,6 @@ function stMissingNote(item, v) {
   if (item.kind === 'hook') return !v.hookType ? '훅 유형을 골라 주세요' : '어떻게 붙잡는지 적어 주세요';
   if (item.kind === 'segments') return '구간을 2개 이상 나누고 설명을 적어 주세요';
   return '내용을 적어 주세요';
-}
-function stAnswerLine(item, v) {
-  v = v || {};
-  if (item.kind === 'segments' && (v.segments || []).length) return v.segments.map((s) => s.name).join(' → ') + (v.text ? ' · ' + v.text : '');
-  return [item.kind === 'hook' ? v.hookType : '', v.text].filter(Boolean).join(' · ');
 }
 
 // 링크 확인: checkLink + 같은 링크 두 번 막기
@@ -3553,7 +4358,9 @@ function StSubRow({ sub, t, onPreview, onRestart }) {
 }
 PAGES.learn = StLearnPage;
 
-// ── 분석 작성 /student/shorts-learn/[shortId] (시안 D: 한 항목씩) ──
+// ── 분석 작성 /student/shorts-learn/[shortId] (작성 방식 A 워크벤치, B 타임라인, D 한 항목씩) ──
+// C AI 초안 검수는 AI 초안이 곧 정답지라서 학생은 쓸 수 없어요.
+const ST_NO_REVIEW = '학생은 정답지를 미리 볼 수 없어서 쓸 수 없어요';
 function stResolveSub(u, params) {
   if (!u || !byId(db.shorts, params.shortId)) return null;
   if (params.submissionId) { const s = byId(db.submissions, params.submissionId); return s && s.userId === u.id ? s.id : null; }
@@ -3569,28 +4376,21 @@ function StWritePage({ params }) {
   const [subId] = useState(() => stResolveSub(u, params));
   const sub = subId ? byId(db.submissions, subId) : null;
   const player = usePlayer(short);
-  const [answers, setAnswers] = useState(() => (sub ? clone(sub.answers || {}) : {}));
+  const [answers, setAnswersState] = useState(() => (sub ? clone(sub.answers || {}) : {}));
+  const ansRef = useRef(answers);
+  const setAnswers = (a) => { ansRef.current = a; setAnswersState(a); };
   const [step, setStep] = useState(() => (sub ? clamp(sub.step || 0, 0, RUBRIC.length - 1) : 0));
   const [savedAt, setSavedAt] = useState(() => (sub ? sub.updatedAt : now()));
   const [ask, setAsk] = useState(false);
-  const cardRef = useRef();
+  // 작성 방식: 기본은 D 한 항목씩. C는 막혀 있어요.
+  const [mode, setModeState] = useState(() => { const m = wmLoadMode('student'); return m && m !== 'C' ? m : 'D'; });
+  const [aOpen, setAOpen] = useState(() => new Set(RUBRIC.map((i) => i.key)));
+  const [tlFocus, setTlFocus] = useState(null);
   const ref = stRefState(short, u.id);
   const t = useNow(500, ref.key === 'running' || ref.key === 'queued');
   useNow(15000);
   const editable = !!sub && sub.status === 'draft';
   const blocked = ['failed', 'canceled', 'none'].includes(ref.key);
-  const last = step === RUBRIC.length - 1;
-  const go = (i) => {
-    const s = clamp(i, 0, RUBRIC.length - 1); if (s === step) return;
-    setStep(s); if (editable) saveAnswers(sub.id, answers, s, true);
-    const el = cardRef.current;
-    if (el) { const top = el.getBoundingClientRect().top; if (top < 72) window.scrollBy({ top: top - 84, behavior: 'smooth' }); }
-  };
-  const keyRef = useRef(); keyRef.current = () => { if (ask || !editable) return; if (!last) go(step + 1); else if (!blocked) setAsk(true); };
-  useEffect(() => {
-    const k = (e) => { if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); keyRef.current(); } };
-    document.addEventListener('keydown', k); return () => document.removeEventListener('keydown', k);
-  }, []);
 
   if (!short || !sub) return html`<div class="card"><${Empty} icon="alert" title="분석을 찾을 수 없어요" desc="지워졌거나 다른 사람의 분석이에요." action=${html`<button type="button" class="btn" onClick=${() => nav('learn')}>목록으로</button>`} /></div>`;
   const at = stAttempt(sub);
@@ -3604,19 +4404,38 @@ function StWritePage({ params }) {
     </div>`;
   }
 
-  const item = RUBRIC[step];
-  const filled = RUBRIC.map((it) => isItemFilled(it, answers[it.key]));
-  const nFilled = filled.filter(Boolean).length;
-  const change = (v) => { const next = { ...answers, [item.key]: v }; setAnswers(next); saveAnswers(sub.id, next, step, true); setSavedAt(now()); };
-  const saveNow = () => { saveAnswers(sub.id, answers, step, false); setSavedAt(now()); toast({ title: '임시 저장했어요', body: `${nFilled} / 10 항목을 썼어요. 언제든 이어서 쓸 수 있어요.` }); };
+  const nFilled = RUBRIC.filter((it) => isItemFilled(it, answers[it.key])).length;
+  const pickMode = (m) => { if (m === 'C') return; setModeState(m); wmSaveMode('student', m); };
+  // 모든 방식이 같은 답(answers)을 고치고 조용히 저장해요
+  const change = (key, v) => { const next = { ...ansRef.current, [key]: v }; setAnswers(next); saveAnswers(sub.id, next, null, true); setSavedAt(now()); };
+  const goStep = (s) => { setStep(s); saveAnswers(sub.id, ansRef.current, s, true); };
+  const saveNow = () => { saveAnswers(sub.id, ansRef.current, step, false); setSavedAt(now()); toast({ title: '임시 저장했어요', body: `${nFilled} / 10 항목을 썼어요. 언제든 이어서 쓸 수 있어요.` }); };
   const submit = () => {
-    const r = submitAnswers(sub.id, answers);
+    const r = submitAnswers(sub.id, ansRef.current);
     setAsk(false);
     if (r.waiting) { toast({ title: '제출됐어요', body: '정답지가 준비되면 채점해서 알려 드릴게요.' }); nav('learn'); }
     else nav('result', { shortId: sub.shortId, submissionId: sub.id });
   };
-  const prevItems = RUBRIC.slice(0, step).filter((it) => filled[it.n - 1]).slice(-3);
-  const nextItem = RUBRIC[step + 1];
+  // 제출 확인 창에서 빈 항목으로 바로 가기: 방식마다 그 항목을 보여 주는 곳이 달라요
+  const jump = (i) => {
+    setAsk(false);
+    const key = RUBRIC[i].key;
+    if (mode === 'A') { setAOpen((o) => new Set([...o, key])); setTimeout(() => { const el = document.getElementById('st-item-' + key); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 80); }
+    else if (mode === 'B') setTlFocus({ key, n: now() });
+    else goStep(i);
+  };
+  const submitBtn = (label = '제출하기') => html`<button type="button" class="btn btn-primary" disabled=${blocked} onClick=${() => setAsk(true)}>${label}<${Icon} name="send" size="sm" /></button>`;
+
+  let body;
+  if (mode === 'A') body = html`<${WmStudio} player=${player}>
+    <${WmWorkbench} content=${answers} onChange=${change} player=${player} teacher=${false} open=${aOpen} setOpen=${setAOpen} idPrefix="st"
+      counter=${html`<span class="wm-progress"><${Progress} value=${nFilled * 10} /><span class="small muted num">${nFilled} / 10</span></span>`}
+      foot=${html`<div class="wm-bottom"><span class="small muted grow">${nFilled === RUBRIC.length ? '10개 항목을 모두 썼어요. 제출하면 정답지와 비교해 채점해요.' : `${nFilled} / 10 항목을 썼어요. 비어 있는 항목은 0점이에요.`}</span>${submitBtn()}</div>`} />
+  <//>`;
+  else if (mode === 'B') body = html`<${WmTimeline} player=${player} content=${answers} onChange=${change} teacher=${false} filledN=${nFilled} focus=${tlFocus} idPrefix="st" />`;
+  else body = html`<${WmFocus} player=${player} content=${answers} onChange=${change} teacher=${false} step=${step} onStep=${goStep} idPrefix="st" keysOff=${ask}
+    finish=${{ label: '제출하기', icon: 'send', disabled: blocked, onClick: () => setAsk(true) }}
+    headExtra=${at.total > 1 && html`<span class="badge badge-outline st-attempt-narrow">${at.n}번째 시도</span>`} />`;
 
   return html`<div class="st-write-wrap">
     <div class="st-topbar">
@@ -3633,52 +4452,10 @@ function StWritePage({ params }) {
     ${(ref.key === 'running' || ref.key === 'queued') && html`<div class="st-note"><${Callout} icon="sparkles"><span class="small">정답지를 만드는 중이에요. 기다리지 말고 먼저 써 보세요. 제출하면 정답지가 준비되는 대로 채점해 드려요.</span><//></div>`}
     ${ref.key === 'failed' && html`<div class="st-note"><${Callout} tone="bad" icon="alert" action=${html`<button type="button" class="btn btn-sm" onClick=${() => nav('learn')}>목록으로</button>`}><b>정답지를 만들지 못했어요.</b> ${ref.reason}.${ref.refunded ? ' 쓴 크레딧은 돌려드렸어요.' : ''} 채점할 정답지가 없어서 제출할 수 없어요.<//></div>`}
     ${(ref.key === 'canceled' || ref.key === 'none') && html`<div class="st-note"><${Callout} tone="warn" icon="alert" action=${html`<button type="button" class="btn btn-sm" onClick=${() => nav('learn')}>목록으로</button>`}>${ref.key === 'canceled' ? '정답지 만들기를 취소해서 채점할 수 없어요. 목록에서 다시 시작할 수 있어요.' : '이 쇼츠는 아직 정답지가 없어서 제출할 수 없어요.'}<//></div>`}
+    <div class="st-modebar"><${WmModeSwitch} value=${mode} onChange=${pickMode} disabled=${{ C: ST_NO_REVIEW }} /></div>
 
-    <div class="st-write">
-      <div class="st-write-left">
-        <div class="card st-player-card">
-          <div class="st-player-box"><${Player} player=${player} /></div>
-          <${PlayerControls} player=${player} />
-        </div>
-        <details class="card st-fold">
-          <summary><${Icon} name="file" size="sm" /><span class="grow">자막 보기</span><span class="tiny muted">${short.transcript.length}줄</span><${Icon} name="chevD" size="sm" cls="st-fold-chev" /></summary>
-          <div class="st-fold-body"><${Transcript} player=${player} /></div>
-        </details>
-        ${prevItems.length > 0 && html`<div class="card st-prev">
-          <span class="strong small">앞에서 쓴 내용</span>
-          ${prevItems.map((it) => html`<button type="button" class="st-prev-item" onClick=${() => go(it.n - 1)}><span class="tiny muted">${it.n} ${it.title}</span><span class="small st-clamp2">${stAnswerLine(it, answers[it.key]) || '–'}</span></button>`)}
-        </div>`}
-      </div>
-
-      <div class="stack" style=${{ gap: '14px', minWidth: 0 }}>
-        <nav class="card st-stepper-card" aria-label="분석 항목">
-          <div class="row small" style=${{ marginBottom: '10px' }}><span class="strong grow">항목 ${step + 1} / ${RUBRIC.length}${at.total > 1 && html`<span class="badge badge-outline st-attempt-narrow">${at.n}번째 시도</span>`}</span><span class="muted num">채운 항목 ${nFilled} / ${RUBRIC.length}</span></div>
-          <div class="stepper">${RUBRIC.map((it, i) => html`<button type="button" class=${(filled[i] ? 'done' : '') + (i === step ? ' current' : '')} aria-current=${i === step ? 'step' : null} aria-label=${`${it.n}. ${it.title}${filled[i] ? ', 작성함' : ''}`} title=${it.title} onClick=${() => go(i)}><span class="bar"></span><span class="lab">${it.n} ${it.short}</span></button>`)}</div>
-        </nav>
-
-        <section class="card st-item-card" ref=${cardRef} aria-labelledby="st-item-q">
-          <div class="st-item-top">
-            <span class="st-item-kicker">${ST_CIRCLED[step]} ${item.title}</span>
-            <span class="spacer"></span>
-            <span class="small muted num">${step + 1} / ${RUBRIC.length} · ${stAreaName(item.area)}</span>
-          </div>
-          <div class="stack-sm" style=${{ gap: '6px' }}>
-            <h2 class="st-item-q" id="st-item-q">${item.q}</h2>
-            <p class="st-item-help">${item.help}</p>
-          </div>
-          <details class="st-guide" key=${'g-' + item.key}><summary><${Icon} name="bulb" size="sm" /><span class="grow">작성 가이드</span><${Icon} name="chevD" size="sm" cls="st-fold-chev" /></summary><p>${item.guide}</p></details>
-          <${ItemEditor} key=${item.key} item=${item} value=${answers[item.key]} onChange=${change} player=${player} teacher=${false} idPrefix="st" />
-          <div class="st-item-nav">
-            <button type="button" class="btn" disabled=${step === 0} onClick=${() => go(step - 1)}><${Icon} name="arrowL" size="sm" />이전</button>
-            <span class="spacer"></span>
-            ${last ? html`<button type="button" class="btn btn-primary" disabled=${blocked} onClick=${() => setAsk(true)}>제출하기<${Icon} name="send" size="sm" /></button>`
-              : html`<button type="button" class="btn btn-primary" onClick=${() => go(step + 1)}><span>다음<span class="st-next-name">: ${nextItem.title}</span></span><${Icon} name="arrowR" size="sm" /></button>`}
-          </div>
-          <div class="st-kbd desktop-only"><kbd>${ST_MAC ? '⌘' : 'Ctrl'}</kbd><kbd>Enter</kbd><span>${last ? '제출' : '다음 항목'}</span></div>
-        </section>
-      </div>
-    </div>
-    ${ask && html`<${StSubmitDialog} answers=${answers} refState=${ref} onClose=${() => setAsk(false)} onSubmit=${submit} onJump=${(i) => { setAsk(false); go(i); }} />`}
+    ${body}
+    ${ask && html`<${StSubmitDialog} answers=${ansRef.current} refState=${ref} onClose=${() => setAsk(false)} onSubmit=${submit} onJump=${jump} />`}
   </div>`;
 }
 function StSubmitDialog({ answers, refState, onClose, onSubmit, onJump }) {
@@ -4284,10 +5061,10 @@ function TeDatasetRow({ r, t, onPreview, onDelete }) {
       ${known ? html`<div class="stack-sm" style=${{ gap: '1px', minWidth: 0 }}><span class="strong ellipsis" title=${s.title}>${s.title}</span><span class="tiny muted ellipsis">${s.channel}</span></div>`
         : html`<div class="stack-sm" style=${{ gap: '7px' }} aria-label="영상 정보 가져오는 중"><span class="skeleton te-sk" style=${{ width: '150px', height: '12px' }}></span><span class="skeleton te-sk" style=${{ width: '80px', height: '10px' }}></span></div>`}
     </div></td>
-    <td class="num muted">${known ? teDur(s.durationSec) : html`<span class="skeleton te-sk"></span>`}</td>
-    <td class="num">${known ? fmtViews(s.views) : html`<span class="skeleton te-sk"></span>`}</td>
+    <td class="num muted te-nowrap">${known ? teDur(s.durationSec) : html`<span class="skeleton te-sk"></span>`}</td>
+    <td class="num te-nowrap">${known ? fmtViews(s.views) : html`<span class="skeleton te-sk"></span>`}</td>
     <td><div class="te-status-cell"><${DatasetBadge} short=${s} /><${TeStatusDetail} s=${s} st=${st} t=${t} onDelete=${onDelete} /></div></td>
-    <td><${TeAuthorCell} s=${s} /></td>
+    <td class="te-nowrap"><${TeAuthorCell} s=${s} /></td>
     <td class="muted te-nowrap">${fmtRel(r.updated)}</td>
   </tr>`;
 }
@@ -4380,8 +5157,13 @@ function TeEditor({ short }) {
   const mRef = modelRefOf(short.id);
   const refJob = activeJobFor(short.id, 'reference');
   const published = !!tRef && tRef.status === 'published';
-  const [mode, setMode] = useState(() => (mRef && !tRef ? 'review' : 'write'));
-  const view = published ? 'view' : mode === 'review' && mRef ? 'review' : 'write';
+  // 플레이어는 여기서 한 번만 만들어 모든 작성 방식이 나눠 써요 (방식을 바꿔도 재생 위치가 그대로예요)
+  const player = usePlayer(short);
+  // 작성 방식: 고른 적이 있으면 그 방식, 없으면 예전처럼 (AI 초안만 있으면 C 검수, 아니면 A 워크벤치)
+  const [modeSel, setModeSel] = useState(() => wmLoadMode('teacher'));
+  const wm = modeSel || (mRef && !tRef ? 'C' : 'A');
+  const view = published ? 'view' : wm;
+  const reviewing = view === 'C' && !!mRef;
   const [content, setContentState] = useState(() => teNormContent(tRef && tRef.content));
   const cRef = useRef(content);
   const setContent = (c) => { cRef.current = c; setContentState(c); };
@@ -4390,14 +5172,15 @@ function TeEditor({ short }) {
   const [attempted, setAttempted] = useState(false);
   const [tried, setTried] = useState(false); // AI 초안 게시를 눌러 봤는지
   const [open, setOpen] = useState(() => { const first = RUBRIC.find((i) => probBy[i.key]); return new Set([first ? first.key : RUBRIC[0].key]); });
+  const [dStep, setDStep] = useState(() => Math.max(0, RUBRIC.findIndex((i) => probBy[i.key])));
+  const [tlFocus, setTlFocus] = useState(null);
   const [savedAt, setSavedAt] = useState(null);
   const [ask, setAsk] = useState(null); // 'unpublish' | 'import' | 'promote'
   const t = useNow(refJob ? 500 : 15000);
   // 게시, 게시 취소, AI 초안 가져오기로 정답지가 바뀌면 화면 내용을 다시 맞춥니다
   useEffect(() => { const r = teacherRefOf(short.id); if (r) setContent(teNormContent(r.content)); }, [tRef && tRef.id, tRef && tRef.status]);
-  // AI 초안이 새로 생겼는데 직접 쓴 초안이 없으면 검수 화면으로
-  useEffect(() => { if (mRef && !teacherRefOf(short.id)) setMode('review'); }, [mRef && mRef.id]);
 
+  const pickMode = (m) => { setModeSel(m); wmSaveMode('teacher', m); };
   const change = (key, v) => {
     const next = { ...cRef.current, [key]: v };
     setContent(next);
@@ -4406,13 +5189,19 @@ function TeEditor({ short }) {
     else { const nr = ensureTeacherDraft(short.id); saveReference(nr.id, next, false); }
     setSavedAt(now());
   };
+  // 빠진 항목으로 바로 가기: 방식마다 그 항목을 보여 주는 곳이 달라요
+  const jumpTo = (key) => {
+    if (view === 'B') setTlFocus({ key, n: now() });
+    else if (view === 'D') setDStep(Math.max(0, RUBRIC.findIndex((i) => i.key === key)));
+    else { setOpen((o) => new Set([...o, key])); teScrollTo('te-item-' + key); }
+  };
   const publish = () => {
     const probs = validateReference(cRef.current);
     if (probs.length) {
       setAttempted(true);
       const keys = [...new Set(probs.map((p) => p.key))];
-      setOpen(new Set([...open, ...keys]));
-      teScrollTo('te-item-' + keys[0]);
+      if (view === 'A') { setOpen(new Set([...open, ...keys])); teScrollTo('te-item-' + keys[0]); }
+      else jumpTo(keys[0]);
       return;
     }
     let r = teacherRefOf(short.id);
@@ -4423,7 +5212,7 @@ function TeEditor({ short }) {
     toast({ title: '게시했어요. 이제 학생 채점에 쓰여요', body: short.title });
     teScrollTop();
   };
-  const unpublish = () => { unpublishReference(tRef.id); setAsk(null); setMode('write'); toast({ title: '게시를 취소했어요', body: '초안으로 돌아갔어요. 고친 뒤 다시 게시해 주세요.' }); };
+  const unpublish = () => { unpublishReference(tRef.id); setAsk(null); toast({ title: '게시를 취소했어요', body: '초안으로 돌아갔어요. 고친 뒤 다시 게시해 주세요.' }); };
   const reqAi = () => { requestAiDraft(short.id); toast({ title: 'AI 초안을 요청했어요', body: '15초쯤 걸려요. 그동안 계속 써도 돼요.' }); };
   const doImport = () => {
     const existing = teacherRefOf(short.id);
@@ -4433,8 +5222,9 @@ function TeEditor({ short }) {
     for (const item of RUBRIC) if (rv[item.key] === 'rejected') r.content[item.key] = teBlankItem(item);
     r.updatedAt = now();
     commit();
-    setContent(teNormContent(r.content)); setAttempted(false); setMode('write'); setAsk(null);
-    setOpen(new Set([RUBRIC[0].key]));
+    setContent(teNormContent(r.content)); setAttempted(false); setAsk(null);
+    if (wm === 'C') setModeSel('A'); // 가져온 초안은 워크벤치에서 고쳐요 (고른 방식은 그대로 기억해요)
+    setOpen(new Set([RUBRIC[0].key])); setDStep(0);
     toast({ title: 'AI 초안을 가져왔어요', body: '직접 고쳐서 게시하면 돼요.' });
     teScrollTop();
   };
@@ -4450,13 +5240,29 @@ function TeEditor({ short }) {
     else { setTried(true); teScrollTo('te-promote'); }
   };
 
-  const filled = view === 'review' ? teDecided(mRef) : view === 'view' ? refReadyCount(tRef.content) : refReadyCount(content);
-  const saveLabel = view === 'review' ? '검수한 내용은 바로 저장돼요'
+  const filled = reviewing ? teDecided(mRef) : view === 'view' ? refReadyCount(tRef.content) : refReadyCount(content);
+  const saveLabel = reviewing ? '검수한 내용은 바로 저장돼요'
     : view === 'view' ? `게시 ${fmtRel(tRef.publishedAt || tRef.updatedAt)}`
     : savedAt ? `자동 저장됨 · ${fmtRel(savedAt)}` : tRef ? `저장됨 · ${fmtRel(tRef.updatedAt)}` : '쓰면 자동으로 저장돼요';
   const subs = db.submissions.filter((s) => s.shortId === short.id && s.status === 'scored');
   const refPct = refJob && refJob.status === 'running' ? jobProgress(refJob, t).pct : null;
-  const toggle = (key) => { const s = new Set(open); if (s.has(key)) s.delete(key); else s.add(key); setOpen(s); };
+  const problemBox = attempted && html`<${TeProblems} probBy=${probBy} onJump=${jumpTo} onPublish=${publish} />`;
+
+  let body;
+  if (view === 'view') body = html`<${WmStudio} player=${player}><${TeItemList} content=${teNormContent(tRef.content)} player=${player} open=${open} setOpen=${setOpen} readOnly=${true} /><//>`;
+  else if (view === 'A') body = html`<${WmStudio} player=${player}><${TeItemList} content=${content} player=${player} open=${open} setOpen=${setOpen} probBy=${probBy} attempted=${attempted} onChange=${change} onPublish=${publish} mRef=${mRef} refJob=${refJob} onImport=${askImport} problemBox=${problemBox} /><//>`;
+  else if (view === 'B') body = html`<${WmTimeline} player=${player} content=${content} onChange=${change} teacher=${true} filledN=${refReadyCount(content)} probBy=${probBy} attempted=${attempted} focus=${tlFocus} idPrefix="te" head=${problemBox} />`;
+  else if (view === 'C') body = mRef
+    ? html`<${WmStudio} player=${player}><${TeReview} short=${short} mRef=${mRef} player=${player} tried=${tried} onPromote=${() => promote(false)} onImport=${askImport} /><//>`
+    : html`<${TeAiEmpty} short=${short} job=${refJob} t=${t} onRequest=${reqAi} />`;
+  else body = html`<${WmFocus} player=${player} content=${content} onChange=${change} teacher=${true} step=${dStep} onStep=${setDStep} idPrefix="te"
+      filledOf=${(it) => !probBy[it.key]} problemsOf=${(k) => (attempted ? probBy[k] || [] : [])} countLabel="준비된 항목" keysOff=${!!ask}
+      finish=${{ label: '게시', icon: 'upload', onClick: publish }}
+      endStep=${{ label: '게시 전 확인', short: '게시', render: (go) => html`<${WmFocusEnd} kicker="게시 전 확인" title=${problems.length ? '빠진 곳을 채우면 게시할 수 있어요' : '10개 항목을 모두 채웠어요'}
+        desc="게시하면 학생 채점에 쓰여요. 항목을 누르면 그 질문으로 돌아가요."
+        rows=${RUBRIC.map((item) => ({ item, ok: !probBy[item.key], bad: attempted && !!probBy[item.key], note: probBy[item.key] ? probBy[item.key].map((p) => p.msg).join(', ') : wmAnswerLine(item, content[item.key]) || '작성됨' }))}
+        onJump=${go} onBack=${() => go(RUBRIC.length - 1)}
+        action=${html`<button type="button" class="btn btn-primary" onClick=${publish}><${Icon} name="upload" size="sm" />게시</button>`} />` }} />`;
 
   return html`<div class="stack">
     <div class="card te-top">
@@ -4466,32 +5272,25 @@ function TeEditor({ short }) {
         <span class="small muted">${short.channel} · ${teDur(short.durationSec)} · 조회수 ${fmtViews(short.views)}${tRef && tRef.authorId !== u.id ? ` · ${teName(tRef.authorId)} 선생님 작성` : ''}</span>
       </div>
       <div class="te-top-side">
-        <div class="te-top-prog"><span class="tiny muted">${view === 'review' ? '검수' : '작성'}</span><${Progress} value=${filled * 10} /><span class="num small strong">${filled} / 10</span></div>
+        <div class="te-top-prog"><span class="tiny muted">${reviewing ? '검수' : '작성'}</span><${Progress} value=${filled * 10} /><span class="num small strong">${filled} / 10</span></div>
         <span class="tiny muted te-save"><${Icon} name=${view === 'view' ? 'check' : 'clock'} size="xs" />${saveLabel}</span>
         <div class="te-top-actions">
           ${refJob && html`<span class="badge badge-dashed te-live"><${Icon} name="sparkles" size="xs" />AI 초안 ${refPct == null ? '대기 중' : `만드는 중 · ${refPct}%`}</span>`}
-          ${!mRef && !refJob && !published && html`<button class="btn" onClick=${reqAi}><${Icon} name="sparkles" size="sm" />AI 초안 요청</button>`}
+          ${!mRef && !refJob && !published && view !== 'C' && html`<button class="btn" onClick=${reqAi}><${Icon} name="sparkles" size="sm" />AI 초안 요청</button>`}
           ${published ? html`<button class="btn" onClick=${() => setAsk('unpublish')}>게시 취소</button>`
-            : view === 'write' ? html`<button class="btn btn-primary" onClick=${publish}><${Icon} name="upload" size="sm" />게시</button>` : null}
+            : view !== 'C' ? html`<button class="btn btn-primary" onClick=${publish}><${Icon} name="upload" size="sm" />게시</button>` : null}
         </div>
       </div>
     </div>
 
-    ${mRef && !published && html`<div class="row-wrap te-modebar">
-      <${Seg} label="작성 방식" value=${view} onChange=${setMode} options=${[{ value: 'review', label: 'AI 초안 검수' }, { value: 'write', label: '직접 쓰기' }]} />
-      <span class="small muted">${view === 'review' ? 'AI가 쓴 초안을 항목마다 수락하거나 고쳐요.' : '영상과 자막을 보며 10개 항목을 직접 써요.'}</span>
-    </div>`}
+    ${!published && html`<div class="te-modebar"><${WmModeSwitch} value=${wm} onChange=${pickMode} /></div>`}
 
     ${published && html`<div class="te-grid te-pubrow">
       <${Callout} tone="ok" icon="check">게시된 정답지예요. 학생 채점에 쓰이고 있어요. 고치려면 위에서 [게시 취소]를 눌러 초안으로 돌려 주세요.<//>
       ${subs.length > 0 && html`<div class="card te-subs"><span class="stat-icon"><${Icon} name="users" size="sm" /></span><div class="grow stack-sm" style=${{ gap: 0 }}><span class="strong">학생 제출 ${subs.length}개 · 평균 ${Math.round(avg(subs.map((s) => s.evaluation.total)))}점</span><span class="tiny muted">이 쇼츠로 채점한 결과예요</span></div><button class="btn btn-sm" onClick=${() => nav('students')}>학생 결과</button></div>`}
     </div>`}
 
-    <${TeStudio} short=${short} render=${(player) => view === 'review'
-      ? html`<${TeReview} short=${short} mRef=${mRef} player=${player} tried=${tried} onPromote=${() => promote(false)} onImport=${askImport} />`
-      : view === 'view'
-        ? html`<${TeItemList} content=${teNormContent(tRef.content)} player=${player} open=${open} setOpen=${setOpen} toggle=${toggle} readOnly=${true} probBy=${{}} />`
-        : html`<${TeItemList} content=${content} player=${player} open=${open} setOpen=${setOpen} toggle=${toggle} probBy=${probBy} attempted=${attempted} onChange=${change} onPublish=${publish} mRef=${mRef} refJob=${refJob} onImport=${askImport} />`} />
+    ${body}
 
     ${ask === 'unpublish' && html`<${Modal} title="게시를 취소할까요?" onClose=${() => setAsk(null)} foot=${html`<button class="btn" onClick=${() => setAsk(null)}>그대로 두기</button><button class="btn btn-dark" onClick=${unpublish}>게시 취소</button>`}>
       <p class="soft">초안으로 돌아가요. 다시 게시하기 전까지 이 정답지는 새 채점에 쓰이지 않아요. 이미 끝난 채점은 그대로예요.</p>
@@ -4505,82 +5304,55 @@ function TeEditor({ short }) {
   </div>`;
 }
 
-// 영상, 자막(왼쪽 고정) + 오른쪽 내용. 플레이어는 여기서 한 번만 만들고 오른쪽과 나눠 씁니다.
-function TeStudio({ short, render }) {
-  const player = usePlayer(short);
-  const scRef = useRef();
-  const cur = captionAt(short, player.t);
-  useEffect(() => {
-    const box = scRef.current; if (!box) return;
-    const el = box.querySelector('.transcript-line.on'); if (!el) return;
-    if (el.offsetTop < box.scrollTop || el.offsetTop + el.offsetHeight > box.scrollTop + box.clientHeight) box.scrollTop = Math.max(0, el.offsetTop - box.clientHeight / 3);
-  }, [cur && cur[0]]);
-  return html`<div class="te-studio"><div class="te-studio-grid">
-    <div class="te-left">
-      <div class="card te-player-card"><div class="te-player-box"><${Player} player=${player} /></div><${PlayerControls} player=${player} /></div>
-      <div class="card te-tr-card">
-        <div class="te-tr-head"><span class="strong grow">자막</span><span class="tiny muted">누르면 그 시점으로 가요</span></div>
-        <div class="te-tr-scroll" ref=${scRef}><${Transcript} player=${player} /></div>
-      </div>
+// 게시 검사 결과: 빠진 항목 목록 (누르면 그 항목으로), 다 채웠으면 게시 버튼
+function TeProblems({ probBy, onJump, onPublish }) {
+  const probKeys = RUBRIC.filter((i) => probBy[i.key]);
+  return probKeys.length
+    ? html`<div id="te-problems"><${Callout} tone="bad" icon="alert">
+        <div class="strong">게시하려면 ${probKeys.length}개 항목을 더 채워 주세요</div>
+        <ul class="te-plist">${probKeys.map((i) => html`<li><button type="button" class="te-plink" onClick=${() => onJump(i.key)}>${i.n}. ${i.title}</button> <span class="soft">${probBy[i.key].map((p) => p.msg).join(', ')}</span></li>`)}</ul>
+      <//></div>`
+    : html`<${Callout} tone="ok" icon="check" action=${html`<button class="btn btn-sm btn-primary" onClick=${onPublish}>게시</button>`}>빠진 곳을 다 채웠어요. 이제 게시할 수 있어요.<//>`;
+}
+
+// C AI 초안 검수: 아직 초안이 없을 때 (요청 전, 만드는 중, 실패)
+function TeAiEmpty({ short, job, t, onRequest }) {
+  const p = job && job.status === 'running' ? jobProgress(job, t) : null;
+  const failed = !job ? db.jobs.find((j) => j.shortId === short.id && j.kind === 'reference' && j.status === 'failed') : null;
+  const used = refsOf(short.id).some((r) => r.source === 'model' && r.status === 'superseded');
+  if (job) return html`<div class="te-narrow"><div class="card card-pad stack-lg">
+    <div class="row-top" style=${{ gap: '12px' }}>
+      <span class="stat-icon"><${Icon} name="sparkles" size="sm" /></span>
+      <div class="grow stack-sm" style=${{ gap: '2px' }}><h2 style=${{ fontSize: '17px' }}>AI 초안을 만들고 있어요</h2><span class="small muted">${job.status === 'queued' ? `대기 중이에요${queuePosition(job) ? ` · 앞에 ${queuePosition(job)}개` : ' · 곧 시작해요'}` : `${p.pct}% · 15초쯤 걸려요`}</span></div>
     </div>
-    <div class="te-right">${render(player)}</div>
+    <ol class="te-steps">${job.plan.map((st, i) => { const state = !p ? 'todo' : i < p.stepIndex ? 'done' : i === p.stepIndex ? 'now' : 'todo'; return html`<li class=${'te-step ' + state}><span class="te-step-dot">${state === 'done' ? html`<${Icon} name="check" size="xs" />` : i + 1}</span><span class="grow">${st.label}</span>${state === 'now' && html`<span class="tiny muted num">${p.pct}%</span>`}</li>`; })}</ol>
+    <${Progress} value=${p ? p.pct : 0} indeterminate=${!p} />
+    <p class="small soft">다 되면 여기서 바로 검수할 수 있어요. 그동안 A, B, D 방식으로 직접 써도 돼요.</p>
+  </div></div>`;
+  return html`<div class="te-narrow"><div class="card">
+    <${Empty} icon="sparkles" title=${used ? '검수한 AI 초안은 이미 정답지로 옮겼어요' : '아직 AI 초안이 없어요'}
+      desc=${used ? '새 초안이 필요하면 다시 요청해요. 15초쯤 걸려요.' : 'AI가 정답지 초안을 먼저 쓰면, 항목마다 수락하거나 고치기만 하면 돼요. 15초쯤 걸려요.'}
+      action=${html`<button type="button" class="btn btn-primary" onClick=${onRequest}><${Icon} name="sparkles" size="sm" />AI 초안 요청</button>`} />
+    <div class="te-ai-empty-foot">
+      ${failed && html`<${Callout} tone="bad" icon="alert">지난번 AI 초안을 만들지 못했어요. ${failed.failReason || '잠시 뒤 다시 요청해 주세요'}.<//>`}
+      <p class="tiny muted">직접 쓰는 정답지는 A 워크벤치, B 타임라인, D 한 항목씩에서 게시할 수 있어요.</p>
+    </div>
   </div></div>`;
 }
 
-// 직접 쓰기(A안 워크벤치)와 게시된 정답지 보기에 함께 씁니다
-function TeItemList({ content, player, open, setOpen, toggle, probBy, attempted, onChange, onPublish, readOnly, mRef, refJob, onImport }) {
-  const allOpen = open.size === RUBRIC.length;
+// 직접 쓰기(A 워크벤치)와 게시된 정답지 보기: 공통 워크벤치에 선생님 안내와 게시 줄을 붙여요
+function TeItemList({ content, player, open, setOpen, probBy = {}, attempted, onChange, onPublish, readOnly, mRef, refJob, onImport, problemBox }) {
   const probKeys = RUBRIC.filter((i) => probBy[i.key]);
   const n = refReadyCount(content);
-  return html`<div class="stack" style=${{ gap: '10px' }}>
-    <div class="row-wrap te-items-head">
-      <span class="section-title">분석</span><span class="badge badge-outline">양식 v1 · 10개 항목</span>
-      <span class="spacer"></span>
-      <button type="button" class="btn btn-ghost btn-sm" onClick=${() => setOpen(allOpen ? new Set() : new Set(RUBRIC.map((i) => i.key)))}><${Icon} name=${allOpen ? 'chevU' : 'chevD'} size="xs" />${allOpen ? '모두 접기' : '모두 펼치기'}</button>
-    </div>
-    ${!readOnly && mRef && n === 0 && html`<${Callout} icon="sparkles" action=${html`<button class="btn btn-sm" onClick=${onImport}>AI 초안 가져오기</button>`}>AI 초안이 있어요. 가져와서 고쳐 쓰면 더 빨라요.<//>`}
-    ${!readOnly && refJob && html`<${Callout} tone="neutral" icon="sparkles">AI 초안을 만들고 있어요. 다 되면 'AI 초안 검수'에서 볼 수 있어요. 그동안 직접 써도 돼요.<//>`}
-    ${!readOnly && attempted && (probKeys.length
-      ? html`<div id="te-problems"><${Callout} tone="bad" icon="alert">
-          <div class="strong">게시하려면 ${probKeys.length}개 항목을 더 채워 주세요</div>
-          <ul class="te-plist">${probKeys.map((i) => html`<li><button type="button" class="te-plink" onClick=${() => { setOpen(new Set([...open, i.key])); teScrollTo('te-item-' + i.key); }}>${i.n}. ${i.title}</button> <span class="soft">${probBy[i.key].map((p) => p.msg).join(', ')}</span></li>`)}</ul>
-        <//></div>`
-      : html`<${Callout} tone="ok" icon="check" action=${html`<button class="btn btn-sm btn-primary" onClick=${onPublish}>게시</button>`}>빠진 곳을 다 채웠어요. 이제 게시할 수 있어요.<//>`)}
-    ${RUBRIC.map((item) => html`<${TeItemCard} key=${item.key} item=${item} value=${content[item.key]} open=${open.has(item.key)} onToggle=${() => toggle(item.key)} onChange=${(v) => onChange(item.key, v)} player=${player} problems=${probBy[item.key] || []} attempted=${attempted} readOnly=${readOnly} />`)}
-    ${!readOnly && html`<div class="te-bottom">
-      <span class="small muted grow">${probKeys.length ? `게시하려면 ${probKeys.length}개 항목을 더 채워야 해요` : '10개 항목을 모두 채웠어요'}</span>
-      <button class="btn btn-primary" onClick=${onPublish}><${Icon} name="upload" size="sm" />게시</button>
-    </div>`}
+  const head = !readOnly && html`
+    ${mRef && n === 0 && html`<${Callout} icon="sparkles" action=${html`<button class="btn btn-sm" onClick=${onImport}>AI 초안 가져오기</button>`}>AI 초안이 있어요. 가져와서 고쳐 쓰면 더 빨라요.<//>`}
+    ${refJob && html`<${Callout} tone="neutral" icon="sparkles">AI 초안을 만들고 있어요. 다 되면 'C AI 초안 검수'에서 볼 수 있어요. 그동안 직접 써도 돼요.<//>`}
+    ${problemBox}`;
+  const foot = !readOnly && html`<div class="te-bottom">
+    <span class="small muted grow">${probKeys.length ? `게시하려면 ${probKeys.length}개 항목을 더 채워야 해요` : '10개 항목을 모두 채웠어요'}</span>
+    <button class="btn btn-primary" onClick=${onPublish}><${Icon} name="upload" size="sm" />게시</button>
   </div>`;
-}
-
-function TeItemCard({ item, value, open, onToggle, onChange, player, problems, attempted, readOnly }) {
-  const v = value || teBlankItem(item);
-  const filled = isItemFilled(item, v);
-  const ok = readOnly || problems.length === 0;
-  const bad = !readOnly && attempted && !ok;
-  const preview = (item.kind === 'segments' ? (v.segments || []).map((s) => s.name).join(' → ') : '') || v.text || '';
-  const status = readOnly ? null
-    : ok ? html`<span class="te-st ok"><${Icon} name="check" size="xs" />작성됨</span>`
-    : bad ? html`<span class="te-st bad">${problems.length}개 빠짐</span>`
-    : filled ? html`<span class="te-st warn">${problems.length}개 더 채우기</span>`
-    : html`<span class="te-st">아직 안 씀</span>`;
-  return html`<div class=${'card te-item' + (open ? ' open' : '') + (bad ? ' bad' : '')} id=${'te-item-' + item.key}>
-    <button type="button" class="te-item-head" onClick=${onToggle} aria-expanded=${String(open)}>
-      <span class=${'item-num ' + (ok ? 'done' : 'todo')}>${item.n}</span>
-      <span class="grow stack-sm" style=${{ gap: '1px', minWidth: 0 }}>
-        <span class="row" style=${{ gap: '8px' }}><span class="strong">${item.title}</span><span class="badge desktop-only">${teAreaName(item.area)}</span></span>
-        <span class=${'tiny muted' + (open ? '' : ' ellipsis')}>${open ? item.q : preview || item.help}</span>
-      </span>
-      ${status}
-      <${Icon} name=${open ? 'chevU' : 'chevD'} size="sm" />
-    </button>
-    ${open && html`<div class="te-item-body">
-      ${readOnly ? html`<${ItemView} item=${item} value=${v} player=${player} />${teKeyPoints(v)}`
-        : html`<div class="te-guide"><${Icon} name="bulb" size="sm" /><span>${item.guide} <span class="muted">${item.scoring}</span></span></div>
-          <${ItemEditor} item=${item} value=${v} onChange=${onChange} player=${player} teacher=${true} problems=${attempted ? problems : []} idPrefix="te" />`}
-    </div>`}
-  </div>`;
+  return html`<${WmWorkbench} content=${content} onChange=${onChange} player=${player} teacher=${true} readOnly=${readOnly} probBy=${probBy} attempted=${attempted} open=${open} setOpen=${setOpen} idPrefix="te" head=${head} foot=${foot} />`;
 }
 
 // ── AI 초안 검수 (C안) ───────────────────────────────
